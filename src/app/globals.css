@@ -54,27 +54,31 @@ select {
   color: var(--muted);
 }
 
+.brandLockup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .rowCount {
   color: var(--gold);
   font-size: 14px;
   white-space: nowrap;
 }
 
-.controls {
+.controlsPanel {
   max-width: 1280px;
   margin: 0 auto 16px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  padding: 12px;
+  padding: 18px;
   background: var(--panel);
   border: 1px solid var(--line);
+  border-top: 4px solid var(--gold);
   border-radius: 8px;
 }
 
-.controls input,
-.controls button {
+.controlsPanel input,
+.controlsPanel button,
+.controlsPanel select {
   color: var(--text);
   background: var(--panel-strong);
   border: 1px solid var(--line);
@@ -82,22 +86,68 @@ select {
   padding: 8px 10px;
 }
 
-.searchInput {
-  min-width: min(280px, 100%);
-  flex: 1 1 220px;
+.controlsTop,
+.controlsMiddle,
+.controlsBottom,
+.refreshRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.numberControl,
+.controlsMiddle,
+.controlsBottom,
+.refreshRow {
+  margin-top: 16px;
+}
+
+.controlsMiddle {
+  flex-wrap: wrap;
+}
+
+.controlsBottom {
+  align-items: end;
+}
+
+.searchInput {
+  width: min(360px, 100%);
+}
+
+.runeControl,
+.compactControl,
+.entriesControl,
 .checkControl {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--muted);
-  font-size: 14px;
+  color: var(--text);
 }
 
-.numberControl input {
-  width: 92px;
+.runeControl {
+  font-size: 22px;
+}
+
+.runeControl input {
+  width: 112px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.compactControl {
+  color: var(--muted);
+}
+
+.compactControl input {
+  width: 108px;
+}
+
+.entriesControl select {
+  min-width: 84px;
+}
+
+.checkControl {
+  color: var(--text);
 }
 
 .sourceHint {
@@ -128,11 +178,37 @@ select {
   color: #071018;
 }
 
+.segmented button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .refreshButton {
   cursor: pointer;
 }
 
+.refreshButton:disabled,
+.pager button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .refreshText {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.paginationSummary {
+  color: var(--muted);
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: var(--muted);
   font-size: 14px;
 }
@@ -149,7 +225,7 @@ select {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 1180px;
 }
 
 th,
@@ -161,10 +237,38 @@ td {
 }
 
 th {
-  color: var(--gold);
+  color: var(--text);
   background: #1d2026;
   position: sticky;
   top: 0;
+}
+
+.numeric {
+  text-align: right;
+}
+
+.sortHeader {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.numeric .sortHeader {
+  text-align: right;
+}
+
+.sortIcon {
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
 }
 
 .itemCell {
@@ -194,12 +298,30 @@ th {
   color: var(--gold);
 }
 
-.profit {
-  color: var(--green);
+.profitPill,
+.lossPill,
+.limitPill {
+  display: inline-flex;
+  min-width: 44px;
+  justify-content: center;
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-weight: 700;
 }
 
-.loss {
-  color: var(--red);
+.profitPill {
+  color: #081308;
+  background: var(--green);
+}
+
+.lossPill {
+  color: #210909;
+  background: var(--red);
+}
+
+.limitPill {
+  color: var(--text);
+  background: #6a6d72;
 }
 
 .badge-fresh {
@@ -228,6 +350,10 @@ th {
     flex-direction: column;
   }
 
+  .brandLockup {
+    align-items: start;
+  }
+
   .toolbar h1 {
     font-size: 26px;
   }
@@ -241,5 +367,26 @@ th {
   .segmented {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .controlsTop,
+  .controlsMiddle,
+  .controlsBottom,
+  .refreshRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .runeControl,
+  .compactControl,
+  .entriesControl,
+  .checkControl,
+  .pager {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .paginationSummary {
+    margin-left: 0;
   }
 }

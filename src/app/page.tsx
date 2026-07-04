@@ -1,12 +1,21 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlchTable } from "@/components/AlchTable";
 import { CalculatorControls } from "@/components/CalculatorControls";
 import { getRefreshState } from "@/lib/osrs/refresh";
+import {
+  enrichRows,
+  filterRows,
+  paginateRows,
+  sortRows,
+} from "@/lib/osrs/table";
+import type { SortKey, SortState } from "@/lib/osrs/table";
 import type { AlchRow, PriceApiPayload, PricingMode } from "@/lib/osrs/types";
 
 const DEFAULT_RUNE_COST = 105;
+type PageSize = 25 | 50 | 100 | "all";
 
 export default function Home() {
   const [rows, setRows] = useState<AlchRow[]>([]);
@@ -16,8 +25,17 @@ export default function Home() {
   const [natureRuneSourceText, setNatureRuneSourceText] =
     useState("fallback default");
   const hasEditedNatureRuneCost = useRef(false);
-  const [profitableOnly, setProfitableOnly] = useState(true);
-  const [hideStale, setHideStale] = useState(false);
+  const [includeMembers, setIncludeMembers] = useState(true);
+  const [minLimit, setMinLimit] = useState("");
+  const [minVolume, setMinVolume] = useState("");
+  const [minProfit, setMinProfit] = useState("");
+  const [maxProfit, setMaxProfit] = useState("");
+  const [pageSize, setPageSize] = useState<PageSize>(50);
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<SortState>({
+    key: "profit",
+    direction: "desc",
+  });
   const [fetchedAtSeconds, setFetchedAtSeconds] = useState(0);
   const [nowSeconds, setNowSeconds] = useState(() =>
     Math.floor(Date.now() / 1000),
@@ -77,31 +95,54 @@ export default function Home() {
     ? getRefreshState(fetchedAtSeconds, nowSeconds)
     : null;
 
+  const enrichedRows = useMemo(
+    () => enrichRows(rows, pricingMode, natureRuneCost, nowSeconds),
+    [natureRuneCost, nowSeconds, pricingMode, rows],
+  );
+
   const filteredRows = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return rows.filter((row) => {
-      const buyPrice =
-        pricingMode === "recent" ? row.recentBuyPrice : row.stableBuyPrice;
-      const profit =
-        buyPrice === null ? null : row.highalch - buyPrice - natureRuneCost;
-      const isStale =
-        row.recentBuyTime === null || nowSeconds - row.recentBuyTime > 30 * 60;
-
-      if (query && !row.name.toLowerCase().includes(query)) return false;
-      if (profitableOnly && (profit === null || profit <= 0)) return false;
-      if (hideStale && isStale) return false;
-      return true;
+    return filterRows(enrichedRows, {
+      search,
+      includeMembers,
+      profitableOnly: false,
+      hideStale: false,
+      minProfit: parseOptionalNumber(minProfit),
+      maxProfit: parseOptionalNumber(maxProfit),
+      minLimit: parseOptionalNumber(minLimit),
+      minVolume: parseOptionalNumber(minVolume),
     });
   }, [
-    hideStale,
-    natureRuneCost,
-    nowSeconds,
-    pricingMode,
-    profitableOnly,
-    rows,
+    enrichedRows,
+    includeMembers,
+    maxProfit,
+    minLimit,
+    minProfit,
+    minVolume,
     search,
   ]);
+
+  const sortedRows = useMemo(
+    () => sortRows(filteredRows, sort),
+    [filteredRows, sort],
+  );
+
+  const totalPages =
+    pageSize === "all" ? 1 : Math.max(1, Math.ceil(sortedRows.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const paginatedRows = useMemo(
+    () => paginateRows(sortedRows, safePage, pageSize),
+    [pageSize, safePage, sortedRows],
+  );
+  const resultStart =
+    sortedRows.length === 0
+      ? 0
+      : pageSize === "all"
+        ? 1
+        : (safePage - 1) * pageSize + 1;
+  const resultEnd =
+    pageSize === "all"
+      ? sortedRows.length
+      : Math.min(sortedRows.length, safePage * pageSize);
 
   function handleManualRefresh() {
     if (refreshState && !refreshState.canFetch) {
@@ -120,6 +161,16 @@ export default function Home() {
     setNatureRuneSourceText("manual override");
   }
 
+  function handleSort(key: SortKey) {
+    setSort((current) => {
+      if (current.key !== key) return { key, direction: "desc" };
+      return {
+        key,
+        direction: current.direction === "desc" ? "asc" : "desc",
+      };
+    });
+  }
+
   const refreshText = refreshState
     ? `${status} Next refresh in ${refreshState.secondsUntilRefresh}s.`
     : status;
@@ -127,33 +178,56 @@ export default function Home() {
   return (
     <main className="appShell">
       <section className="toolbar">
-        <div>
-          <h1>OSRS High Alchemy Calculator</h1>
-          <p>Live alch profit with visible price freshness.</p>
+        <div className="brandLockup">
+          <Image alt="" height="48" priority src="/alchmark.svg" width="48" />
+          <div>
+            <h1>OSRS High Alchemy Calculator</h1>
+            <p>Live alch profit with visible price freshness.</p>
+          </div>
         </div>
-        <span className="rowCount">{filteredRows.length.toLocaleString()} rows</span>
+        <span className="rowCount">{sortedRows.length.toLocaleString()} rows</span>
       </section>
       <CalculatorControls
-        hideStale={hideStale}
+        includeMembers={includeMembers}
+        maxProfit={maxProfit}
+        minLimit={minLimit}
+        minProfit={minProfit}
+        minVolume={minVolume}
         natureRuneCost={natureRuneCost}
         natureRuneSourceText={natureRuneSourceText}
+        page={safePage}
+        pageSize={pageSize}
         pricingMode={pricingMode}
-        profitableOnly={profitableOnly}
         refreshText={refreshText}
+        resultEnd={resultEnd}
+        resultStart={resultStart}
         search={search}
-        setHideStale={setHideStale}
+        setIncludeMembers={setIncludeMembers}
+        setMaxProfit={setMaxProfit}
+        setMinLimit={setMinLimit}
+        setMinProfit={setMinProfit}
+        setMinVolume={setMinVolume}
         setNatureRuneCost={handleNatureRuneCostChange}
+        setPage={setPage}
+        setPageSize={setPageSize}
         setPricingMode={setPricingMode}
-        setProfitableOnly={setProfitableOnly}
         setSearch={setSearch}
+        totalPages={totalPages}
+        totalRows={sortedRows.length}
         onRefresh={handleManualRefresh}
       />
       <AlchTable
-        natureRuneCost={natureRuneCost}
         nowSeconds={nowSeconds}
-        pricingMode={pricingMode}
-        rows={filteredRows}
+        rows={paginatedRows}
+        sort={sort}
+        onSort={handleSort}
       />
     </main>
   );
+}
+
+function parseOptionalNumber(value: string) {
+  if (value.trim() === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
