@@ -49,3 +49,10 @@ export type AlchRow = {
   stableBuyPrice: number | null;
   stableLowVolume: number;
 };
+
+export type PriceApiPayload = {
+  rows: AlchRow[];
+  fetchedAt: string;
+  sourceAge: number | null;
+  stableAvailable: boolean;
+};
