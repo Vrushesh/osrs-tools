@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlchTable } from "@/components/AlchTable";
 import { CalculatorControls } from "@/components/CalculatorControls";
+import { ToolTabs } from "@/components/ToolTabs";
 import { getRefreshState } from "@/lib/osrs/refresh";
 import {
   enrichRows,
@@ -187,6 +188,7 @@ export default function Home() {
         </div>
         <span className="rowCount">{sortedRows.length.toLocaleString()} rows</span>
       </section>
+      <ToolTabs active="alch" />
       <section className="dataStatus" aria-label="Price refresh status">
         <button className="refreshButton" onClick={handleManualRefresh} type="button">
           Refresh prices
