@@ -37,4 +37,203 @@ select {
 .toolbar {
   max-width: 1280px;
   margin: 0 auto 16px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toolbar h1 {
+  margin: 0 0 6px;
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.toolbar p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.rowCount {
+  color: var(--gold);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.controls {
+  max-width: 1280px;
+  margin: 0 auto 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.controls input,
+.controls button {
+  color: var(--text);
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.searchInput {
+  min-width: min(280px, 100%);
+  flex: 1 1 220px;
+}
+
+.numberControl,
+.checkControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.numberControl input {
+  width: 92px;
+}
+
+.checkControl input {
+  accent-color: var(--gold);
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segmented button {
+  border: 0;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.segmented .active {
+  background: var(--blue);
+  color: #071018;
+}
+
+.refreshButton {
+  cursor: pointer;
+}
+
+.refreshText {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.tableWrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  color: var(--gold);
+  background: #1d2026;
+  position: sticky;
+  top: 0;
+}
+
+.itemCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.itemIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.members,
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.members {
+  background: #3a3324;
+  color: var(--gold);
+}
+
+.profit {
+  color: var(--green);
+}
+
+.loss {
+  color: var(--red);
+}
+
+.badge-fresh {
+  color: #081308;
+  background: var(--green);
+}
+
+.badge-aging {
+  color: #1f1605;
+  background: var(--gold);
+}
+
+.badge-stale,
+.badge-no-recent-buy-price {
+  color: #210909;
+  background: var(--red);
+}
+
+@media (max-width: 720px) {
+  .appShell {
+    padding: 16px;
+  }
+
+  .toolbar {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .toolbar h1 {
+    font-size: 26px;
+  }
+
+  .segmented,
+  .segmented button,
+  .refreshButton {
+    width: 100%;
+  }
+
+  .segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 }
