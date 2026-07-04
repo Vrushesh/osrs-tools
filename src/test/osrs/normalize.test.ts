@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeRows } from "../../lib/osrs/normalize";
+import { getNatureRunePrice, normalizeRows } from "../../lib/osrs/normalize";
 import type {
   FiveMinutePrice,
   LatestPrice,
@@ -52,5 +52,20 @@ describe("normalizeRows", () => {
         stableLowVolume: 42,
       },
     ]);
+  });
+
+  it("extracts the nature rune active buy price from latest low", () => {
+    expect(
+      getNatureRunePrice({
+        "561": { low: 127, lowTime: 1_800_000_000 },
+      }),
+    ).toEqual({ price: 127, time: 1_800_000_000 });
+  });
+
+  it("returns null when nature rune latest low is unavailable", () => {
+    expect(getNatureRunePrice({ "561": { high: 130 } })).toEqual({
+      price: null,
+      time: null,
+    });
   });
 });

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { normalizeRows } from "@/lib/osrs/normalize";
+import { getNatureRunePrice, normalizeRows } from "@/lib/osrs/normalize";
 import type {
   FiveMinutePrice,
   LatestPrice,
@@ -53,6 +53,7 @@ export async function GET() {
 
   const fiveMinute =
     fiveMinuteResult.status === "fulfilled" ? fiveMinuteResult.value.json.data : {};
+  const natureRune = getNatureRunePrice(latestResult.value.json.data);
 
   const payload: PriceApiPayload = {
     rows: normalizeRows(
@@ -61,6 +62,8 @@ export async function GET() {
       fiveMinute,
     ),
     fetchedAt: new Date().toISOString(),
+    natureRunePrice: natureRune.price,
+    natureRunePriceTime: natureRune.time,
     sourceAge: latestResult.value.sourceAge,
     stableAvailable: fiveMinuteResult.status === "fulfilled",
   };

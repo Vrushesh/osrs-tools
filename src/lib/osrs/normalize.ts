@@ -5,6 +5,8 @@ import type {
   MappingItem,
 } from "./types";
 
+const NATURE_RUNE_ID = "561";
+
 export function normalizeRows(
   mapping: MappingItem[],
   latest: Record<string, LatestPrice>,
@@ -29,4 +31,13 @@ export function normalizeRows(
         stableLowVolume: stable?.lowPriceVolume ?? 0,
       };
     });
+}
+
+export function getNatureRunePrice(latest: Record<string, LatestPrice>) {
+  const natureRune = latest[NATURE_RUNE_ID];
+
+  return {
+    price: natureRune?.low ?? null,
+    time: natureRune?.lowTime ?? null,
+  };
 }

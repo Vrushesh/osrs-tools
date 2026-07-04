@@ -6,6 +6,7 @@ type Props = {
   search: string;
   setSearch: (value: string) => void;
   natureRuneCost: number;
+  natureRuneSourceText: string;
   setNatureRuneCost: (value: number) => void;
   profitableOnly: boolean;
   setProfitableOnly: (value: boolean) => void;
@@ -51,6 +52,7 @@ export function CalculatorControls(props: Props) {
           value={props.natureRuneCost}
           onChange={(event) => props.setNatureRuneCost(Number(event.target.value))}
         />
+        <span className="sourceHint">{props.natureRuneSourceText}</span>
       </label>
 
       <label className="checkControl">

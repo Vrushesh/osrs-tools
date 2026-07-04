@@ -53,6 +53,8 @@ export type AlchRow = {
 export type PriceApiPayload = {
   rows: AlchRow[];
   fetchedAt: string;
+  natureRunePrice: number | null;
+  natureRunePriceTime: number | null;
   sourceAge: number | null;
   stableAvailable: boolean;
 };

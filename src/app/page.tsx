@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlchTable } from "@/components/AlchTable";
 import { CalculatorControls } from "@/components/CalculatorControls";
 import { getRefreshState } from "@/lib/osrs/refresh";
@@ -13,6 +13,9 @@ export default function Home() {
   const [pricingMode, setPricingMode] = useState<PricingMode>("recent");
   const [search, setSearch] = useState("");
   const [natureRuneCost, setNatureRuneCost] = useState(DEFAULT_RUNE_COST);
+  const [natureRuneSourceText, setNatureRuneSourceText] =
+    useState("fallback default");
+  const hasEditedNatureRuneCost = useRef(false);
   const [profitableOnly, setProfitableOnly] = useState(true);
   const [hideStale, setHideStale] = useState(false);
   const [fetchedAtSeconds, setFetchedAtSeconds] = useState(0);
@@ -33,6 +36,18 @@ export default function Home() {
 
     const payload = (await response.json()) as PriceApiPayload;
     setRows(payload.rows);
+    if (payload.natureRunePrice !== null) {
+      if (!hasEditedNatureRuneCost.current) {
+        setNatureRuneCost(payload.natureRunePrice);
+        setNatureRuneSourceText(`${payload.natureRunePrice.toLocaleString()} gp live`);
+      } else {
+        setNatureRuneSourceText(
+          `manual override · live ${payload.natureRunePrice.toLocaleString()} gp`,
+        );
+      }
+    } else if (!hasEditedNatureRuneCost.current) {
+      setNatureRuneSourceText(`${DEFAULT_RUNE_COST.toLocaleString()} gp fallback`);
+    }
     setFetchedAtSeconds(Math.floor(new Date(payload.fetchedAt).getTime() / 1000));
     setStatus(forceMessage ? "Prices refreshed." : "Prices loaded.");
   }
@@ -99,6 +114,12 @@ export default function Home() {
     void loadPrices(true);
   }
 
+  function handleNatureRuneCostChange(value: number) {
+    hasEditedNatureRuneCost.current = true;
+    setNatureRuneCost(value);
+    setNatureRuneSourceText("manual override");
+  }
+
   const refreshText = refreshState
     ? `${status} Next refresh in ${refreshState.secondsUntilRefresh}s.`
     : status;
@@ -115,12 +136,13 @@ export default function Home() {
       <CalculatorControls
         hideStale={hideStale}
         natureRuneCost={natureRuneCost}
+        natureRuneSourceText={natureRuneSourceText}
         pricingMode={pricingMode}
         profitableOnly={profitableOnly}
         refreshText={refreshText}
         search={search}
         setHideStale={setHideStale}
-        setNatureRuneCost={setNatureRuneCost}
+        setNatureRuneCost={handleNatureRuneCostChange}
         setPricingMode={setPricingMode}
         setProfitableOnly={setProfitableOnly}
         setSearch={setSearch}
