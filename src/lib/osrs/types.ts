@@ -1,0 +1,51 @@
+export type PricingMode = "recent" | "stable";
+
+export type FreshnessLabel =
+  | "Fresh"
+  | "Aging"
+  | "Stale"
+  | "No recent buy price";
+
+export type Freshness = {
+  label: FreshnessLabel;
+  ageSeconds: number | null;
+};
+
+export type MappingItem = {
+  id: number;
+  name: string;
+  icon: string;
+  members: boolean;
+  highalch?: number;
+  lowalch?: number;
+  limit?: number;
+  value?: number;
+  examine?: string;
+};
+
+export type LatestPrice = {
+  high?: number | null;
+  highTime?: number | null;
+  low?: number | null;
+  lowTime?: number | null;
+};
+
+export type FiveMinutePrice = {
+  avgHighPrice?: number | null;
+  highPriceVolume?: number;
+  avgLowPrice?: number | null;
+  lowPriceVolume?: number;
+};
+
+export type AlchRow = {
+  id: number;
+  name: string;
+  icon: string;
+  members: boolean;
+  highalch: number;
+  limit?: number;
+  recentBuyPrice: number | null;
+  recentBuyTime: number | null;
+  stableBuyPrice: number | null;
+  stableLowVolume: number;
+};
