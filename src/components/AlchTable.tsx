@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   calculatePotentialProfit,
   calculateProfit,
@@ -70,7 +71,7 @@ export function AlchTable({
               <tr key={row.id}>
                 <td>
                   <div className="itemCell">
-                    <img
+                    <Image
                       alt=""
                       className="itemIcon"
                       height="32"

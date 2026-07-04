@@ -38,7 +38,11 @@ export default function Home() {
   }
 
   useEffect(() => {
-    void loadPrices();
+    const timer = window.setTimeout(() => {
+      void loadPrices();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
