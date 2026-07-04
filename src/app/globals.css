@@ -87,7 +87,6 @@ select {
   padding: 12px 16px;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-top: 3px solid var(--gold);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -160,6 +159,19 @@ select {
   font-weight: 700;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.runeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.runeIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .runeControl input {
@@ -391,11 +403,15 @@ th {
 .lossPill,
 .limitPill {
   display: inline-flex;
-  min-width: 44px;
   justify-content: center;
   border-radius: 5px;
   padding: 3px 8px;
   font-weight: 700;
+}
+
+.profitPill,
+.lossPill {
+  min-width: 44px;
 }
 
 tbody tr:hover {
@@ -406,7 +422,7 @@ tbody tr:hover {
   display: inline-flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
   width: 100%;
 }
 
@@ -421,9 +437,21 @@ tbody tr:hover {
 }
 
 .limitPill {
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 3px 6px;
   color: var(--text);
   background: #5f636b;
+  font-size: 12px;
   opacity: 0.82;
+}
+
+.limitLabel {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .badge-fresh {

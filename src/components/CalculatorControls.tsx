@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { PricingMode } from "@/lib/osrs/types";
 
 type PageSize = 25 | 50 | 100 | "all";
@@ -57,7 +58,16 @@ export function CalculatorControls(props: Props) {
         </div>
 
         <label className="runeControl">
-          <span>Nature rune</span>
+          <span className="runeLabel">
+            <Image
+              alt=""
+              className="runeIcon"
+              height="24"
+              src="/nature-rune.png"
+              width="24"
+            />
+            Nature rune
+          </span>
           <input
             min="0"
             type="number"
@@ -70,7 +80,7 @@ export function CalculatorControls(props: Props) {
 
       <input className="filtersToggleInput" id="filters-toggle" type="checkbox" />
       <label className="filtersToggle" htmlFor="filters-toggle">
-        Filters: Limit ≥ {props.minLimit || "any"} · Vol ≥{" "}
+        Filters: Limit ≥ {props.minLimit || "any"} · 5min Vol ≥{" "}
         {props.minVolume || "any"} · Profit ≥ {props.minProfit || "any"}
       </label>
 
@@ -104,7 +114,7 @@ export function CalculatorControls(props: Props) {
         </label>
 
         <label className="compactControl">
-          Min volume
+          Min 5min Volume
           <input
             min="0"
             placeholder="Min"

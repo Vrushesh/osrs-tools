@@ -13,9 +13,9 @@ const columns: Array<{ key: SortKey; label: string; className?: string }> = [
   { key: "item", label: "Item" },
   { key: "buy", label: "Buy", className: "numeric" },
   { key: "highalch", label: "High Alch", className: "numeric" },
-  { key: "profit", label: "Profit (incl. rune)", className: "numeric" },
+  { key: "profit", label: "Profit / GE Limit", className: "numeric" },
   { key: "lastUpdated", label: "Last Updated" },
-  { key: "volume", label: "5m Volume", className: "numeric" },
+  { key: "volume", label: "5min Volume", className: "numeric" },
 ];
 
 function formatNumber(value: number | null) {
@@ -87,7 +87,8 @@ export function AlchTable({ rows, nowSeconds, sort, onSort }: Props) {
                   >
                     {formatNumber(entry.profit)}
                   </span>
-                  <span className="limitPill" title="GE limit">
+                  <span className="limitPill" title="GE limit: max quantity bought every 4 hours">
+                    <span className="limitLabel">GE</span>
                     {entry.row.limit ?? "-"}
                   </span>
                 </div>
