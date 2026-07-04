@@ -146,9 +146,7 @@ export default function Home() {
 
   function handleManualRefresh() {
     if (refreshState && !refreshState.canFetch) {
-      setStatus(
-        `Prices checked ${refreshState.secondsSinceFetch}s ago. Next live refresh in ${refreshState.secondsUntilRefresh}s.`,
-      );
+      setStatus(`Next live refresh in ${refreshState.secondsUntilRefresh}s.`);
       return;
     }
 
@@ -173,7 +171,7 @@ export default function Home() {
 
   const refreshText = refreshState
     ? status === "Prices loaded." || status === "Prices refreshed."
-      ? `Updated ${refreshState.secondsSinceFetch}s ago · next in ${refreshState.secondsUntilRefresh}s`
+      ? `Updated ${refreshState.secondsSinceFetch}s ago`
       : status
     : status;
 
@@ -189,6 +187,12 @@ export default function Home() {
         </div>
         <span className="rowCount">{sortedRows.length.toLocaleString()} rows</span>
       </section>
+      <section className="dataStatus" aria-label="Price refresh status">
+        <button className="refreshButton" onClick={handleManualRefresh} type="button">
+          Refresh prices
+        </button>
+        <span className="refreshText">{refreshText}</span>
+      </section>
       <CalculatorControls
         includeMembers={includeMembers}
         maxProfit={maxProfit}
@@ -200,7 +204,6 @@ export default function Home() {
         page={safePage}
         pageSize={pageSize}
         pricingMode={pricingMode}
-        refreshText={refreshText}
         resultEnd={resultEnd}
         resultStart={resultStart}
         search={search}
@@ -216,7 +219,6 @@ export default function Home() {
         setSearch={setSearch}
         totalPages={totalPages}
         totalRows={sortedRows.length}
-        onRefresh={handleManualRefresh}
       />
       <AlchTable
         nowSeconds={nowSeconds}

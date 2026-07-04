@@ -28,14 +28,34 @@ type Props = {
   resultEnd: number;
   totalRows: number;
   setPage: (value: number) => void;
-  refreshText: string;
-  onRefresh: () => void;
 };
 
 export function CalculatorControls(props: Props) {
   return (
     <section className="controlsPanel">
       <div className="controlsTop">
+        <div className="segmented" aria-label="Pricing mode">
+          <button
+            className={props.pricingMode === "recent" ? "active" : ""}
+            onClick={() => props.setPricingMode("recent")}
+            type="button"
+          >
+            <span className="modeLabelFull">Most Recent</span>
+            <span className="modeLabelShort">Recent</span>
+          </button>
+          <button
+            className={props.pricingMode === "stable" ? "active" : ""}
+            onClick={() => props.setPricingMode("stable")}
+            type="button"
+          >
+            <span className="modeLabelFull">Stable Pricing</span>
+            <span className="modeLabelShort">Stable</span>
+          </button>
+          <button disabled title="Official GE pricing is planned after the MVP" type="button">
+            Official GE
+          </button>
+        </div>
+
         <label className="runeControl">
           <span>Nature rune</span>
           <input
@@ -46,37 +66,6 @@ export function CalculatorControls(props: Props) {
           />
           <span className="sourceHint">{props.natureRuneSourceText}</span>
         </label>
-
-        <div className="modeStatusGroup">
-          <div className="segmented" aria-label="Pricing mode">
-            <button
-              className={props.pricingMode === "recent" ? "active" : ""}
-              onClick={() => props.setPricingMode("recent")}
-              type="button"
-            >
-              <span className="modeLabelFull">Most Recent</span>
-              <span className="modeLabelShort">Recent</span>
-            </button>
-            <button
-              className={props.pricingMode === "stable" ? "active" : ""}
-              onClick={() => props.setPricingMode("stable")}
-              type="button"
-            >
-              <span className="modeLabelFull">Stable Pricing</span>
-              <span className="modeLabelShort">Stable</span>
-            </button>
-            <button disabled title="Official GE pricing is planned after the MVP" type="button">
-              Official GE
-            </button>
-          </div>
-
-          <div className="refreshInline">
-            <button className="refreshButton" onClick={props.onRefresh} type="button">
-              Refresh
-            </button>
-            <span className="refreshText">{props.refreshText}</span>
-          </div>
-        </div>
       </div>
 
       <input className="filtersToggleInput" id="filters-toggle" type="checkbox" />
@@ -167,9 +156,7 @@ export function CalculatorControls(props: Props) {
             <option value="all">All</option>
           </select>
         </label>
-      </div>
 
-      <div className="refreshRow">
         <span className="paginationSummary">
           Showing {props.resultStart.toLocaleString()}-
           {props.resultEnd.toLocaleString()} of {props.totalRows.toLocaleString()}

@@ -70,6 +70,16 @@ select {
   white-space: nowrap;
 }
 
+.dataStatus {
+  width: 100%;
+  max-width: 1280px;
+  margin: -6px auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .controlsPanel {
   width: 100%;
   max-width: 1280px;
@@ -94,8 +104,7 @@ select {
 
 .controlsTop,
 .controlsMiddle,
-.controlsBottom,
-.refreshRow {
+.controlsBottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -105,25 +114,21 @@ select {
 
 .controlsMiddle,
 .filtersContent,
-.controlsBottom,
-.refreshRow {
+.controlsBottom {
   margin-top: 10px;
 }
 
 .controlsMiddle,
 .filtersContent {
   display: grid;
-  grid-template-columns: auto minmax(170px, 1fr) minmax(170px, 1fr) minmax(300px, 1.4fr);
+  grid-template-columns: auto minmax(150px, 1fr) minmax(150px, 1fr) minmax(270px, 1.4fr);
   align-items: center;
 }
 
 .controlsBottom {
   display: grid;
-  grid-template-columns: minmax(260px, 460px) auto 1fr;
-}
-
-.refreshRow {
-  justify-content: flex-end;
+  grid-template-columns: minmax(280px, 1fr) auto auto auto;
+  gap: 14px;
 }
 
 .filtersContent {
@@ -135,13 +140,8 @@ select {
   display: none;
 }
 
-.controlsBottom {
-  align-items: center;
-  justify-content: flex-start;
-}
-
 .searchInput {
-  width: min(460px, 100%);
+  width: 100%;
   min-width: 0;
 }
 
@@ -159,6 +159,7 @@ select {
   font-size: 15px;
   font-weight: 700;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .runeControl input {
@@ -172,6 +173,7 @@ select {
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
+  justify-content: flex-end;
 }
 
 .compactControl input {
@@ -255,6 +257,7 @@ select {
 .paginationSummary {
   color: var(--muted);
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .pager {
@@ -263,21 +266,6 @@ select {
   gap: 8px;
   color: var(--muted);
   font-size: 14px;
-}
-
-.modeStatusGroup {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.refreshInline {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .memberSegment {
@@ -460,6 +448,7 @@ tbody tr:hover {
   }
 
   .toolbar,
+  .dataStatus,
   .controlsPanel,
   .tableWrap {
     width: 100%;
@@ -469,6 +458,12 @@ tbody tr:hover {
   .toolbar {
     align-items: start;
     flex-direction: column;
+  }
+
+  .dataStatus {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: -4px;
   }
 
   .brandLockup {
@@ -522,28 +517,14 @@ tbody tr:hover {
   }
 
   .controlsTop,
-  .controlsBottom,
-  .refreshRow {
+  .controlsBottom {
     display: flex;
     align-items: stretch;
     flex-direction: column;
   }
 
-  .modeStatusGroup,
-  .refreshInline {
-    align-items: stretch;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .refreshInline {
-    align-items: center;
-    flex-direction: row;
-    gap: 8px;
-  }
-
   .refreshButton {
-    flex: 0 0 auto;
+    width: 100%;
   }
 
   .filtersToggle {
@@ -580,6 +561,11 @@ tbody tr:hover {
   .compactControl {
     align-items: start;
     flex-direction: column;
+  }
+
+  .runeControl {
+    align-items: start;
+    justify-content: flex-start;
   }
 
   .entriesControl {
