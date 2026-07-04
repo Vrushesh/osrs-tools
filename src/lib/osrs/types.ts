@@ -50,8 +50,25 @@ export type AlchRow = {
   stableLowVolume: number;
 };
 
+export type PriceItem = {
+  id: number;
+  name: string;
+  icon: string;
+  members: boolean;
+  limit?: number;
+  recentHighPrice: number | null;
+  recentHighTime: number | null;
+  recentLowPrice: number | null;
+  recentLowTime: number | null;
+  stableHighPrice: number | null;
+  stableHighVolume: number;
+  stableLowPrice: number | null;
+  stableLowVolume: number;
+};
+
 export type PriceApiPayload = {
   rows: AlchRow[];
+  items: PriceItem[];
   fetchedAt: string;
   natureRunePrice: number | null;
   natureRunePriceTime: number | null;

@@ -31,8 +31,15 @@ select {
 }
 
 .appShell {
+  width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
   padding: 24px;
+  overflow-x: hidden;
+}
+
+.appShell > * {
+  min-width: 0;
 }
 
 .toolbar {
@@ -68,6 +75,38 @@ select {
   color: var(--gold);
   font-size: 14px;
   white-space: nowrap;
+}
+
+.toolTabs {
+  width: 100%;
+  max-width: 1280px;
+  margin: -4px auto 12px;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.toolTabs a {
+  min-width: 0;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.toolTabs .active {
+  color: #071018;
+  background: var(--blue);
+}
+
+.tabLabelShort {
+  display: none;
 }
 
 .dataStatus {
@@ -303,9 +342,172 @@ select {
   background: var(--gold);
 }
 
+.emptyState,
+.detailPanel {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.emptyState {
+  padding: 24px;
+  color: var(--muted);
+}
+
+.emptyState code {
+  color: var(--gold);
+}
+
+.armourControlHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.armourModeStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.armourRefresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 220px;
+  text-align: right;
+}
+
+.armourFilters {
+  margin-top: 14px;
+  grid-template-columns: auto minmax(150px, 220px) minmax(260px, 1fr);
+}
+
+.armourLayout {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  align-items: start;
+}
+
+.armourLayout > * {
+  min-width: 0;
+}
+
+.armourResults {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.armourTableWrap {
+  margin: 0;
+}
+
+.armourTableWrap table {
+  min-width: 920px;
+}
+
+.mobileSort,
+.armourCards {
+  display: none;
+}
+
+tbody tr.selectedRow {
+  background: rgba(110, 168, 217, 0.1);
+}
+
+.armourTableWrap tbody tr {
+  cursor: pointer;
+}
+
+.armourTableWrap tbody tr:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: -2px;
+}
+
+.detailPanel {
+  position: sticky;
+  top: 16px;
+  padding: 16px;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detailHeader h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.metricGrid {
+  margin: 16px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.metricGrid div {
+  padding: 10px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.metricGrid dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.metricGrid dd {
+  margin: 4px 0 0;
+  font-weight: 800;
+}
+
+.warningText {
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.breakdownList {
+  display: grid;
+  gap: 8px;
+}
+
+.breakdownRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.breakdownRow span:last-child {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 .tableWrap {
   width: 100%;
   max-width: 1280px;
+  min-width: 0;
   margin: 0 auto;
   overflow: auto;
   border: 1px solid var(--line);
@@ -471,16 +673,29 @@ tbody tr:hover {
 }
 
 @media (max-width: 720px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
   .appShell {
+    width: 100vw;
     padding: 16px;
   }
 
   .toolbar,
+  .toolTabs,
   .dataStatus,
   .controlsPanel,
+  .armourLayout,
+  .emptyState,
   .tableWrap {
-    width: 100%;
-    max-width: 100%;
+    width: min(100%, 358px);
+    max-width: 358px;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .toolbar {
@@ -492,6 +707,26 @@ tbody tr:hover {
     align-items: stretch;
     flex-direction: column;
     margin-top: -4px;
+    gap: 6px;
+  }
+
+  .toolTabs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .toolTabs a {
+    padding-inline: 8px;
+    text-align: center;
+  }
+
+  .tabLabelFull {
+    display: none;
+  }
+
+  .tabLabelShort {
+    display: inline;
   }
 
   .brandLockup {
@@ -544,11 +779,30 @@ tbody tr:hover {
     padding: 12px;
   }
 
+  .armourControls {
+    border-radius: 6px;
+  }
+
+  .armourControlHeader,
+  .armourModeStack,
+  .armourRefresh {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .armourRefresh {
+    gap: 6px;
+    text-align: left;
+  }
+
   .controlsTop,
   .controlsBottom {
     display: flex;
     align-items: stretch;
     flex-direction: column;
+    min-width: 0;
   }
 
   .refreshButton {
@@ -573,6 +827,11 @@ tbody tr:hover {
   .filtersToggleInput:checked + .filtersToggle + .filtersContent {
     display: grid;
     align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .armourControls .filtersContent {
+    display: grid;
     grid-template-columns: 1fr;
   }
 
@@ -617,6 +876,120 @@ tbody tr:hover {
     grid-template-columns: 1fr 1fr;
   }
 
+  .armourLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .armourTableWrap {
+    display: none;
+  }
+
+  .mobileSort {
+    display: block;
+  }
+
+  .mobileSort label {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .mobileSort select {
+    width: 100%;
+    color: var(--text);
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 9px 10px;
+  }
+
+  .armourCards {
+    display: grid;
+    gap: 10px;
+  }
+
+  .armourCard {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  .armourCard.selectedRow {
+    border-color: rgba(110, 168, 217, 0.85);
+    background: rgba(110, 168, 217, 0.12);
+  }
+
+  .armourCardHeader {
+    display: grid;
+    gap: 8px;
+  }
+
+  .armourCardHeader .itemCell {
+    align-items: start;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .armourCardHeader .itemCell span:first-child {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .armourCardHeader .profitPill,
+  .armourCardHeader .lossPill {
+    justify-self: start;
+    min-width: 70px;
+  }
+
+  .armourCardStats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .armourCardStats div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    padding: 8px;
+    background: rgba(44, 48, 56, 0.72);
+    border: 1px solid rgba(59, 64, 74, 0.7);
+    border-radius: 6px;
+  }
+
+  .armourCardStats span {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .armourCardStats strong {
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .detailPanel {
+    position: static;
+    max-width: 100%;
+  }
+
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
+
   .refreshText {
     white-space: normal;
   }
@@ -638,15 +1011,6 @@ tbody tr:hover {
 
   .pager button:last-child {
     justify-self: end;
-  }
-
-  table {
-    min-width: 860px;
-  }
-
-  th,
-  td {
-    padding: 8px 12px;
   }
 
   .brandLockup img {
