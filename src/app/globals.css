@@ -246,7 +246,7 @@ table {
 
 th,
 td {
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   white-space: nowrap;
@@ -294,8 +294,8 @@ th {
 }
 
 .itemIcon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -324,8 +324,12 @@ th {
   min-width: 44px;
   justify-content: center;
   border-radius: 5px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   font-weight: 700;
+}
+
+tbody tr:hover {
+  background: rgba(215, 168, 79, 0.06);
 }
 
 .profitCell {

@@ -12,10 +12,10 @@ type Props = {
 const columns: Array<{ key: SortKey; label: string; className?: string }> = [
   { key: "item", label: "Item" },
   { key: "buy", label: "Buy", className: "numeric" },
-  { key: "highalch", label: "High Alch Value", className: "numeric" },
-  { key: "profit", label: "Difference (Incl Nature Rune)", className: "numeric" },
+  { key: "highalch", label: "High Alch", className: "numeric" },
+  { key: "profit", label: "Profit (incl. rune)", className: "numeric" },
   { key: "lastUpdated", label: "Last Updated" },
-  { key: "volume", label: "Trade Volume", className: "numeric" },
+  { key: "volume", label: "5m Volume", className: "numeric" },
 ];
 
 function formatNumber(value: number | null) {
@@ -87,7 +87,7 @@ export function AlchTable({ rows, nowSeconds, sort, onSort }: Props) {
                   >
                     {formatNumber(entry.profit)}
                   </span>
-                  <span className="limitPill" title="GE restriction">
+                  <span className="limitPill" title="GE limit">
                     {entry.row.limit ?? "-"}
                   </span>
                 </div>

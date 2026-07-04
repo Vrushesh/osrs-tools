@@ -70,7 +70,7 @@ export function CalculatorControls(props: Props) {
 
       <input className="filtersToggleInput" id="filters-toggle" type="checkbox" />
       <label className="filtersToggle" htmlFor="filters-toggle">
-        Filters: GE ≥ {props.minLimit || "any"} · Demand ≥{" "}
+        Filters: Limit ≥ {props.minLimit || "any"} · Volume ≥{" "}
         {props.minVolume || "any"} · Profit ≥ {props.minProfit || "any"}
       </label>
 
@@ -85,7 +85,7 @@ export function CalculatorControls(props: Props) {
         </label>
 
         <label className="compactControl">
-          GE Restriction:
+          GE Limit:
           <input
             min="0"
             placeholder="Min"
@@ -96,7 +96,7 @@ export function CalculatorControls(props: Props) {
         </label>
 
         <label className="compactControl">
-          Demand:
+          5m Volume:
           <input
             min="0"
             placeholder="Min"
