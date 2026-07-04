@@ -12,7 +12,6 @@ export type SortKey =
   | "highalch"
   | "profit"
   | "lastUpdated"
-  | "limit"
   | "volume";
 
 export type SortDirection = "asc" | "desc";
@@ -106,7 +105,16 @@ export function sortRows(rows: EnrichedAlchRow[], sort: SortState) {
   const direction = sort.direction === "asc" ? 1 : -1;
 
   return [...rows].sort((left, right) => {
-    const comparison = compareSortValue(getSortValue(left, sort.key), getSortValue(right, sort.key));
+    const leftValue = getSortValue(left, sort.key);
+    const rightValue = getSortValue(right, sort.key);
+
+    if (leftValue === null || leftValue === undefined) return 1;
+    if (rightValue === null || rightValue === undefined) return -1;
+
+    const comparison = compareSortValue(
+      leftValue,
+      rightValue,
+    );
     return comparison * direction;
   });
 }
@@ -155,8 +163,6 @@ function getSortValue(row: EnrichedAlchRow, key: SortKey) {
       return row.profit;
     case "lastUpdated":
       return row.lastUpdatedTime;
-    case "limit":
-      return row.row.limit;
     case "volume":
       return row.volume;
   }
@@ -166,9 +172,6 @@ function compareSortValue(
   left: string | number | null | undefined,
   right: string | number | null | undefined,
 ) {
-  if (left === null || left === undefined) return 1;
-  if (right === null || right === undefined) return -1;
-
   if (typeof left === "string" && typeof right === "string") {
     return left.localeCompare(right);
   }

@@ -26,9 +26,9 @@ export default function Home() {
     useState("fallback default");
   const hasEditedNatureRuneCost = useRef(false);
   const [includeMembers, setIncludeMembers] = useState(true);
-  const [minLimit, setMinLimit] = useState("");
-  const [minVolume, setMinVolume] = useState("");
-  const [minProfit, setMinProfit] = useState("");
+  const [minLimit, setMinLimit] = useState("1");
+  const [minVolume, setMinVolume] = useState("1");
+  const [minProfit, setMinProfit] = useState("1");
   const [maxProfit, setMaxProfit] = useState("");
   const [pageSize, setPageSize] = useState<PageSize>(50);
   const [page, setPage] = useState(1);

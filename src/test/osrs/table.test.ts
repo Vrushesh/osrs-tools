@@ -73,6 +73,53 @@ describe("table helpers", () => {
     ).toEqual(["Red d'hide body"]);
   });
 
+  it("keeps the default useful list to profitable rows with limit and volume", () => {
+    const enriched = enrichRows(
+      [
+        ...rows,
+        {
+          id: 4,
+          name: "No limit profitable item",
+          icon: "No limit profitable item.png",
+          members: false,
+          highalch: 2000,
+          recentBuyPrice: 1000,
+          recentBuyTime: 1_800_000_000,
+          stableBuyPrice: 1000,
+          stableLowVolume: 20,
+        },
+        {
+          id: 5,
+          name: "No volume profitable item",
+          icon: "No volume profitable item.png",
+          members: false,
+          highalch: 2000,
+          limit: 10,
+          recentBuyPrice: 1000,
+          recentBuyTime: 1_800_000_000,
+          stableBuyPrice: 1000,
+          stableLowVolume: 0,
+        },
+      ],
+      "recent",
+      127,
+      1_800_000_000,
+    );
+
+    expect(
+      filterRows(enriched, {
+        search: "",
+        includeMembers: true,
+        profitableOnly: false,
+        hideStale: false,
+        minProfit: 1,
+        maxProfit: null,
+        minLimit: 1,
+        minVolume: 1,
+      }).map((row) => row.row.name),
+    ).toEqual(["Ballista limbs", "Red d'hide body"]);
+  });
+
   it("sorts rows by last updated ascending", () => {
     const enriched = enrichRows(rows, "recent", 127, 1_800_000_000);
 
@@ -81,6 +128,33 @@ describe("table helpers", () => {
         (row) => row.row.name,
       ),
     ).toEqual(["Stale item", "Ballista limbs", "Red d'hide body"]);
+  });
+
+  it("keeps unavailable profit rows below priced rows when sorting descending", () => {
+    const enriched = enrichRows(
+      [
+        ...rows,
+        {
+          id: 4,
+          name: "Unavailable item",
+          icon: "Unavailable item.png",
+          members: false,
+          highalch: 10000,
+          limit: 10,
+          recentBuyPrice: null,
+          recentBuyTime: null,
+          stableBuyPrice: null,
+          stableLowVolume: 0,
+        },
+      ],
+      "recent",
+      127,
+      1_800_000_000,
+    );
+
+    const sorted = sortRows(enriched, { key: "profit", direction: "desc" });
+
+    expect(sorted.at(-1)?.row.name).toBe("Unavailable item");
   });
 
   it("paginates rows by page and page size", () => {

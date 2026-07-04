@@ -68,9 +68,15 @@ export function CalculatorControls(props: Props) {
       </div>
       </div>
 
-      <div className="controlsMiddle">
+      <input className="filtersToggleInput" id="filters-toggle" type="checkbox" />
+      <label className="filtersToggle" htmlFor="filters-toggle">
+        Filters: GE ≥ {props.minLimit || "any"} · Demand ≥{" "}
+        {props.minVolume || "any"} · Profit ≥ {props.minProfit || "any"}
+      </label>
+
+      <div className="filtersContent">
         <label className="checkControl">
-          Include Members only items?
+          Include members items
           <input
             checked={props.includeMembers}
             type="checkbox"

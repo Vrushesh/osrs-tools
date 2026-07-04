@@ -15,7 +15,6 @@ const columns: Array<{ key: SortKey; label: string; className?: string }> = [
   { key: "highalch", label: "High Alch Value", className: "numeric" },
   { key: "profit", label: "Difference (Incl Nature Rune)", className: "numeric" },
   { key: "lastUpdated", label: "Last Updated" },
-  { key: "limit", label: "GE Restriction", className: "numeric" },
   { key: "volume", label: "Trade Volume", className: "numeric" },
 ];
 
@@ -68,26 +67,32 @@ export function AlchTable({ rows, nowSeconds, sort, onSort }: Props) {
                     width="32"
                   />
                   <span>{entry.row.name}</span>
-                  {entry.row.members ? <span className="members">Members</span> : null}
+                  {entry.row.members ? (
+                    <span className="membersMark" title="Members item">
+                      M
+                    </span>
+                  ) : null}
                 </div>
               </td>
               <td className="numeric">{formatNumber(entry.buyPrice)}</td>
               <td className="numeric">{formatNumber(entry.row.highalch)}</td>
               <td className="numeric">
-                <span
-                  className={
-                    entry.profit !== null && entry.profit >= 0
-                      ? "profitPill"
-                      : "lossPill"
-                  }
-                >
-                  {formatNumber(entry.profit)}
-                </span>
+                <div className="profitCell">
+                  <span
+                    className={
+                      entry.profit !== null && entry.profit >= 0
+                        ? "profitPill"
+                        : "lossPill"
+                    }
+                  >
+                    {formatNumber(entry.profit)}
+                  </span>
+                  <span className="limitPill" title="GE restriction">
+                    {entry.row.limit ?? "-"}
+                  </span>
+                </div>
               </td>
               <td>{formatRelativeTime(entry.lastUpdatedTime, nowSeconds)}</td>
-              <td className="numeric">
-                <span className="limitPill">{entry.row.limit ?? "Unavailable"}</span>
-              </td>
               <td className="numeric">{formatNumber(entry.volume)}</td>
             </tr>
           ))}

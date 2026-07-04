@@ -21,6 +21,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 button,
@@ -35,7 +36,7 @@ select {
 }
 
 .toolbar {
-  max-width: 1280px;
+  width: min(100%, 1280px);
   margin: 0 auto 16px;
   display: flex;
   align-items: end;
@@ -47,6 +48,7 @@ select {
   margin: 0 0 6px;
   font-size: 32px;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .toolbar p {
@@ -58,6 +60,7 @@ select {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .rowCount {
@@ -67,7 +70,7 @@ select {
 }
 
 .controlsPanel {
-  max-width: 1280px;
+  width: min(100%, 1280px);
   margin: 0 auto 16px;
   padding: 18px;
   background: var(--panel);
@@ -97,13 +100,24 @@ select {
 }
 
 .controlsMiddle,
+.filtersContent,
 .controlsBottom,
 .refreshRow {
   margin-top: 16px;
 }
 
-.controlsMiddle {
+.controlsMiddle,
+.filtersContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   flex-wrap: wrap;
+}
+
+.filtersToggleInput,
+.filtersToggle {
+  display: none;
 }
 
 .controlsBottom {
@@ -126,6 +140,7 @@ select {
 
 .runeControl {
   font-size: 22px;
+  flex-wrap: wrap;
 }
 
 .runeControl input {
@@ -165,6 +180,7 @@ select {
   border: 1px solid var(--line);
   border-radius: 6px;
   overflow: hidden;
+  flex: 0 0 auto;
 }
 
 .segmented button {
@@ -214,7 +230,7 @@ select {
 }
 
 .tableWrap {
-  max-width: 1280px;
+  width: min(100%, 1280px);
   margin: 0 auto;
   overflow: auto;
   border: 1px solid var(--line);
@@ -225,7 +241,7 @@ select {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1180px;
+  min-width: 1040px;
 }
 
 th,
@@ -284,18 +300,21 @@ th {
   image-rendering: pixelated;
 }
 
-.members,
+.membersMark,
 .badge {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  padding: 3px 8px;
+  justify-content: center;
   font-size: 12px;
 }
 
-.members {
+.membersMark {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
   background: #3a3324;
   color: var(--gold);
+  font-weight: 800;
 }
 
 .profitPill,
@@ -307,6 +326,13 @@ th {
   border-radius: 5px;
   padding: 4px 8px;
   font-weight: 700;
+}
+
+.profitCell {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 6px;
+  width: 100%;
 }
 
 .profitPill {
@@ -352,10 +378,21 @@ th {
 
   .brandLockup {
     align-items: start;
+    width: 100%;
+  }
+
+  .brandLockup > div {
+    min-width: 0;
   }
 
   .toolbar h1 {
-    font-size: 26px;
+    font-size: 20px;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .toolbar p {
+    font-size: 14px;
   }
 
   .segmented,
@@ -366,13 +403,37 @@ th {
 
   .segmented {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .controlsPanel {
+    padding: 14px;
   }
 
   .controlsTop,
-  .controlsMiddle,
   .controlsBottom,
   .refreshRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filtersToggle {
+    display: block;
+    margin-top: 14px;
+    padding: 10px 12px;
+    color: var(--text);
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .filtersContent {
+    display: none;
+  }
+
+  .filtersToggleInput:checked + .filtersToggle + .filtersContent {
+    display: flex;
     align-items: stretch;
     flex-direction: column;
   }
@@ -384,6 +445,22 @@ th {
   .pager {
     justify-content: space-between;
     width: 100%;
+  }
+
+  .compactControl {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .compactControl input,
+  .searchInput,
+  .runeControl input {
+    width: 100%;
+  }
+
+  .brandLockup img {
+    width: 40px;
+    height: 40px;
   }
 
   .paginationSummary {
