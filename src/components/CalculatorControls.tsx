@@ -37,7 +37,7 @@ export function CalculatorControls(props: Props) {
     <section className="controlsPanel">
       <div className="controlsTop">
         <label className="runeControl">
-          <span>Nature Rune price:</span>
+          <span>Nature rune</span>
           <input
             min="0"
             type="number"
@@ -47,45 +47,64 @@ export function CalculatorControls(props: Props) {
           <span className="sourceHint">{props.natureRuneSourceText}</span>
         </label>
 
-        <div className="segmented" aria-label="Pricing mode">
-          <button
-            className={props.pricingMode === "recent" ? "active" : ""}
-            onClick={() => props.setPricingMode("recent")}
-            type="button"
-          >
-            Most Recent
-          </button>
-          <button
-            className={props.pricingMode === "stable" ? "active" : ""}
-            onClick={() => props.setPricingMode("stable")}
-            type="button"
-          >
-          Stable Pricing
-        </button>
-        <button disabled title="Official GE pricing is planned after the MVP" type="button">
-          Official GE
-        </button>
-      </div>
+        <div className="modeStatusGroup">
+          <div className="segmented" aria-label="Pricing mode">
+            <button
+              className={props.pricingMode === "recent" ? "active" : ""}
+              onClick={() => props.setPricingMode("recent")}
+              type="button"
+            >
+              <span className="modeLabelFull">Most Recent</span>
+              <span className="modeLabelShort">Recent</span>
+            </button>
+            <button
+              className={props.pricingMode === "stable" ? "active" : ""}
+              onClick={() => props.setPricingMode("stable")}
+              type="button"
+            >
+              <span className="modeLabelFull">Stable Pricing</span>
+              <span className="modeLabelShort">Stable</span>
+            </button>
+            <button disabled title="Official GE pricing is planned after the MVP" type="button">
+              Official GE
+            </button>
+          </div>
+
+          <div className="refreshInline">
+            <button className="refreshButton" onClick={props.onRefresh} type="button">
+              Refresh
+            </button>
+            <span className="refreshText">{props.refreshText}</span>
+          </div>
+        </div>
       </div>
 
       <input className="filtersToggleInput" id="filters-toggle" type="checkbox" />
       <label className="filtersToggle" htmlFor="filters-toggle">
-        Filters: Limit ≥ {props.minLimit || "any"} · Volume ≥{" "}
+        Filters: Limit ≥ {props.minLimit || "any"} · Vol ≥{" "}
         {props.minVolume || "any"} · Profit ≥ {props.minProfit || "any"}
       </label>
 
       <div className="filtersContent">
-        <label className="checkControl">
-          Include members items
-          <input
-            checked={props.includeMembers}
-            type="checkbox"
-            onChange={(event) => props.setIncludeMembers(event.target.checked)}
-          />
-        </label>
+        <div className="memberSegment" aria-label="Members item filter">
+          <button
+            className={!props.includeMembers ? "active" : ""}
+            onClick={() => props.setIncludeMembers(false)}
+            type="button"
+          >
+            F2P
+          </button>
+          <button
+            className={props.includeMembers ? "active" : ""}
+            onClick={() => props.setIncludeMembers(true)}
+            type="button"
+          >
+            All
+          </button>
+        </div>
 
         <label className="compactControl">
-          GE Limit:
+          Min limit
           <input
             min="0"
             placeholder="Min"
@@ -96,7 +115,7 @@ export function CalculatorControls(props: Props) {
         </label>
 
         <label className="compactControl">
-          5m Volume:
+          Min volume
           <input
             min="0"
             placeholder="Min"
@@ -107,7 +126,7 @@ export function CalculatorControls(props: Props) {
         </label>
 
         <label className="compactControl">
-          Profit:
+          Profit range
           <input
             placeholder="Min"
             type="number"
@@ -125,8 +144,16 @@ export function CalculatorControls(props: Props) {
       </div>
 
       <div className="controlsBottom">
+        <input
+          aria-label="Search items"
+          className="searchInput"
+          placeholder="Search items..."
+          value={props.search}
+          onChange={(event) => props.setSearch(event.target.value)}
+        />
+
         <label className="entriesControl">
-          Show
+          Rows
           <select
             value={String(props.pageSize)}
             onChange={(event) => {
@@ -139,23 +166,10 @@ export function CalculatorControls(props: Props) {
             <option value="100">100</option>
             <option value="all">All</option>
           </select>
-          entries
         </label>
-
-        <input
-          aria-label="Search items"
-          className="searchInput"
-          placeholder="Search..."
-          value={props.search}
-          onChange={(event) => props.setSearch(event.target.value)}
-        />
       </div>
 
       <div className="refreshRow">
-        <button className="refreshButton" onClick={props.onRefresh} type="button">
-          Refresh
-        </button>
-        <span className="refreshText">{props.refreshText}</span>
         <span className="paginationSummary">
           Showing {props.resultStart.toLocaleString()}-
           {props.resultEnd.toLocaleString()} of {props.totalRows.toLocaleString()}

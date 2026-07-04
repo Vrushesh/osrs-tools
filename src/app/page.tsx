@@ -172,7 +172,9 @@ export default function Home() {
   }
 
   const refreshText = refreshState
-    ? `${status} Next refresh in ${refreshState.secondsUntilRefresh}s.`
+    ? status === "Prices loaded." || status === "Prices refreshed."
+      ? `Updated ${refreshState.secondsSinceFetch}s ago · next in ${refreshState.secondsUntilRefresh}s`
+      : status
     : status;
 
   return (

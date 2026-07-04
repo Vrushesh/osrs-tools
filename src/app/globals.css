@@ -36,7 +36,8 @@ select {
 }
 
 .toolbar {
-  width: min(100%, 1280px);
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto 16px;
   display: flex;
   align-items: end;
@@ -70,13 +71,15 @@ select {
 }
 
 .controlsPanel {
-  width: min(100%, 1280px);
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto 16px;
-  padding: 18px;
+  padding: 12px 16px;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-top: 4px solid var(--gold);
+  border-top: 3px solid var(--gold);
   border-radius: 8px;
+  overflow: hidden;
 }
 
 .controlsPanel input,
@@ -86,7 +89,7 @@ select {
   background: var(--panel-strong);
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 7px 10px;
 }
 
 .controlsTop,
@@ -97,22 +100,34 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  min-width: 0;
 }
 
 .controlsMiddle,
 .filtersContent,
 .controlsBottom,
 .refreshRow {
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .controlsMiddle,
 .filtersContent {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(170px, 1fr) minmax(170px, 1fr) minmax(300px, 1.4fr);
   align-items: center;
-  justify-content: space-between;
+}
+
+.controlsBottom {
+  display: grid;
+  grid-template-columns: minmax(260px, 460px) auto 1fr;
+}
+
+.refreshRow {
+  justify-content: flex-end;
+}
+
+.filtersContent {
   gap: 16px;
-  flex-wrap: wrap;
 }
 
 .filtersToggleInput,
@@ -121,11 +136,13 @@ select {
 }
 
 .controlsBottom {
-  align-items: end;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .searchInput {
-  width: min(360px, 100%);
+  width: min(460px, 100%);
+  min-width: 0;
 }
 
 .runeControl,
@@ -139,26 +156,31 @@ select {
 }
 
 .runeControl {
-  font-size: 22px;
+  font-size: 15px;
+  font-weight: 700;
   flex-wrap: wrap;
 }
 
 .runeControl input {
-  width: 112px;
+  width: 88px;
   text-align: center;
-  font-size: 20px;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .compactControl {
   color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .compactControl input {
-  width: 108px;
+  width: 92px;
+  font-weight: 400;
 }
 
 .entriesControl select {
-  min-width: 84px;
+  min-width: 72px;
 }
 
 .checkControl {
@@ -168,6 +190,7 @@ select {
 .sourceHint {
   color: var(--gold);
   font-size: 12px;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -177,6 +200,8 @@ select {
 
 .segmented {
   display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 6px;
   overflow: hidden;
@@ -184,9 +209,18 @@ select {
 }
 
 .segmented button {
+  min-width: 0;
   border: 0;
   border-radius: 0;
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.modeLabelShort {
+  display: none;
 }
 
 .segmented .active {
@@ -202,6 +236,8 @@ select {
 
 .refreshButton {
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .refreshButton:disabled,
@@ -212,13 +248,13 @@ select {
 
 .refreshText {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .paginationSummary {
   color: var(--muted);
   font-size: 14px;
-  margin-left: auto;
 }
 
 .pager {
@@ -229,8 +265,47 @@ select {
   font-size: 14px;
 }
 
+.modeStatusGroup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.refreshInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.memberSegment {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.memberSegment button {
+  min-width: 54px;
+  border: 0;
+  border-radius: 0;
+  padding: 6px 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.memberSegment .active {
+  color: #1a1406;
+  background: var(--gold);
+}
+
 .tableWrap {
-  width: min(100%, 1280px);
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto;
   overflow: auto;
   border: 1px solid var(--line);
@@ -241,12 +316,13 @@ select {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1040px;
+  min-width: 980px;
+  font-variant-numeric: tabular-nums;
 }
 
 th,
 td {
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   white-space: nowrap;
@@ -257,6 +333,8 @@ th {
   background: #1d2026;
   position: sticky;
   top: 0;
+  font-size: 13px;
+  line-height: 1.2;
 }
 
 .numeric {
@@ -267,7 +345,7 @@ th {
   width: 100%;
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
   padding: 0;
   color: inherit;
@@ -278,24 +356,28 @@ th {
 }
 
 .numeric .sortHeader {
+  justify-content: flex-end;
   text-align: right;
 }
 
 .sortIcon {
   color: var(--muted);
-  font-size: 20px;
+  font-size: 14px;
   line-height: 1;
+  min-width: 14px;
+  text-align: center;
 }
 
 .itemCell {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .itemIcon {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -335,7 +417,8 @@ tbody tr:hover {
 .profitCell {
   display: inline-flex;
   justify-content: flex-end;
-  gap: 6px;
+  align-items: center;
+  gap: 7px;
   width: 100%;
 }
 
@@ -351,7 +434,8 @@ tbody tr:hover {
 
 .limitPill {
   color: var(--text);
-  background: #6a6d72;
+  background: #5f636b;
+  opacity: 0.82;
 }
 
 .badge-fresh {
@@ -373,6 +457,13 @@ tbody tr:hover {
 @media (max-width: 720px) {
   .appShell {
     padding: 16px;
+  }
+
+  .toolbar,
+  .controlsPanel,
+  .tableWrap {
+    width: 100%;
+    max-width: 100%;
   }
 
   .toolbar {
@@ -400,31 +491,65 @@ tbody tr:hover {
   }
 
   .segmented,
-  .segmented button,
-  .refreshButton {
+  .segmented button {
     width: 100%;
   }
 
   .segmented {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .segmented button {
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+
+  .modeLabelFull {
+    display: none;
+  }
+
+  .modeLabelShort {
+    display: inline;
+  }
+
+  .segmented button:disabled {
+    display: none;
   }
 
   .controlsPanel {
-    padding: 14px;
+    padding: 12px;
   }
 
   .controlsTop,
   .controlsBottom,
   .refreshRow {
+    display: flex;
     align-items: stretch;
     flex-direction: column;
   }
 
+  .modeStatusGroup,
+  .refreshInline {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .refreshInline {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .refreshButton {
+    flex: 0 0 auto;
+  }
+
   .filtersToggle {
     display: block;
-    margin-top: 14px;
-    padding: 10px 12px;
+    margin-top: 10px;
+    padding: 9px 12px;
     color: var(--text);
     background: var(--panel-strong);
     border: 1px solid var(--line);
@@ -437,15 +562,16 @@ tbody tr:hover {
   }
 
   .filtersToggleInput:checked + .filtersToggle + .filtersContent {
-    display: flex;
+    display: grid;
     align-items: stretch;
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .runeControl,
   .compactControl,
   .entriesControl,
   .checkControl,
+  .memberSegment,
   .pager {
     justify-content: space-between;
     width: 100%;
@@ -456,10 +582,57 @@ tbody tr:hover {
     flex-direction: column;
   }
 
+  .entriesControl {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+  }
+
   .compactControl input,
   .searchInput,
   .runeControl input {
     width: 100%;
+  }
+
+  .entriesControl select {
+    width: 100%;
+  }
+
+  .memberSegment {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .refreshText {
+    white-space: normal;
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .pager button {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .pager span {
+    text-align: center;
+  }
+
+  .pager button:last-child {
+    justify-self: end;
+  }
+
+  table {
+    min-width: 860px;
+  }
+
+  th,
+  td {
+    padding: 8px 12px;
   }
 
   .brandLockup img {
