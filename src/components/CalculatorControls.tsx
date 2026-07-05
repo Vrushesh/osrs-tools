@@ -31,6 +31,15 @@ type Props = {
   setPage: (value: number) => void;
 };
 
+const pricingModeHelp = {
+  recent:
+    "Most Recent uses the latest OSRS Wiki traded buy price. It is best for finding fresh opportunities, but can be noisier.",
+  stable:
+    "Stable Pricing uses smoother wiki price averages. It is better when you want less volatile alch candidates.",
+  official:
+    "Official GE pricing is planned after the MVP. It will use Jagex guide prices once wired in.",
+};
+
 export function CalculatorControls(props: Props) {
   return (
     <section className="controlsPanel">
@@ -39,21 +48,32 @@ export function CalculatorControls(props: Props) {
           <button
             className={props.pricingMode === "recent" ? "active" : ""}
             onClick={() => props.setPricingMode("recent")}
+            title={pricingModeHelp.recent}
             type="button"
           >
             <span className="modeLabelFull">Most Recent</span>
             <span className="modeLabelShort">Recent</span>
+            <span className="modeHelp" aria-hidden="true">
+              ?
+            </span>
           </button>
           <button
             className={props.pricingMode === "stable" ? "active" : ""}
             onClick={() => props.setPricingMode("stable")}
+            title={pricingModeHelp.stable}
             type="button"
           >
             <span className="modeLabelFull">Stable Pricing</span>
             <span className="modeLabelShort">Stable</span>
+            <span className="modeHelp" aria-hidden="true">
+              ?
+            </span>
           </button>
-          <button disabled title="Official GE pricing is planned after the MVP" type="button">
+          <button disabled title={pricingModeHelp.official} type="button">
             Official GE
+            <span className="modeHelp" aria-hidden="true">
+              ?
+            </span>
           </button>
         </div>
 
