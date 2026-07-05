@@ -1,8 +1,10 @@
-:root {
+:root,
+html[data-theme="dark"] {
   color-scheme: dark;
   --bg: #16181c;
   --panel: #22252b;
   --panel-strong: #2c3038;
+  --table-head: #1d2026;
   --text: #f3f1e8;
   --muted: #aaa69a;
   --line: #3b404a;
@@ -10,6 +12,33 @@
   --green: #79c879;
   --red: #d97878;
   --blue: #6ea8d9;
+  --active-text: #071018;
+  --member-bg: #3a3324;
+  --limit-bg: #5f636b;
+  --hover-row: rgba(215, 168, 79, 0.06);
+  --profit-text: #081308;
+  --loss-text: #210909;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --panel-strong: #edf1f6;
+  --table-head: #e6ebf2;
+  --text: #202833;
+  --muted: #626b76;
+  --line: #cfd6df;
+  --gold: #b9842e;
+  --green: #75bf77;
+  --red: #d36a6a;
+  --blue: #7eb4e4;
+  --active-text: #071018;
+  --member-bg: #f2e3c2;
+  --limit-bg: #d7dde6;
+  --hover-row: rgba(184, 132, 46, 0.1);
+  --profit-text: #071307;
+  --loss-text: #250909;
 }
 
 * {
@@ -43,6 +72,31 @@ select {
   align-items: end;
   justify-content: space-between;
   gap: 16px;
+}
+
+.toolbarActions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.themeControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.themeControl select {
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 9px;
 }
 
 .toolbar h1 {
@@ -239,7 +293,7 @@ select {
 
 .segmented .active {
   background: var(--blue);
-  color: #071018;
+  color: var(--active-text);
 }
 
 .segmented button:disabled {
@@ -299,7 +353,7 @@ select {
 }
 
 .memberSegment .active {
-  color: #1a1406;
+  color: var(--active-text);
   background: var(--gold);
 }
 
@@ -330,7 +384,7 @@ td {
 
 th {
   color: var(--text);
-  background: #1d2026;
+  background: var(--table-head);
   position: sticky;
   top: 0;
   font-size: 13px;
@@ -394,7 +448,7 @@ th {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #3a3324;
+  background: var(--member-bg);
   color: var(--gold);
   font-weight: 800;
 }
@@ -415,7 +469,7 @@ th {
 }
 
 tbody tr:hover {
-  background: rgba(215, 168, 79, 0.06);
+  background: var(--hover-row);
 }
 
 .profitCell {
@@ -427,12 +481,12 @@ tbody tr:hover {
 }
 
 .profitPill {
-  color: #081308;
+  color: var(--profit-text);
   background: var(--green);
 }
 
 .lossPill {
-  color: #210909;
+  color: var(--loss-text);
   background: var(--red);
 }
 
@@ -442,7 +496,7 @@ tbody tr:hover {
   min-width: 0;
   padding: 3px 6px;
   color: var(--text);
-  background: #5f636b;
+  background: var(--limit-bg);
   font-size: 12px;
   opacity: 0.82;
 }
@@ -455,18 +509,18 @@ tbody tr:hover {
 }
 
 .badge-fresh {
-  color: #081308;
+  color: var(--profit-text);
   background: var(--green);
 }
 
 .badge-aging {
-  color: #1f1605;
+  color: var(--active-text);
   background: var(--gold);
 }
 
 .badge-stale,
 .badge-no-recent-buy-price {
-  color: #210909;
+  color: var(--loss-text);
   background: var(--red);
 }
 
@@ -486,6 +540,11 @@ tbody tr:hover {
   .toolbar {
     align-items: start;
     flex-direction: column;
+  }
+
+  .toolbarActions {
+    justify-content: space-between;
+    width: 100%;
   }
 
   .dataStatus {

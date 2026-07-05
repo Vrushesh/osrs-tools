@@ -16,7 +16,9 @@ import type { AlchRow, PriceApiPayload, PricingMode } from "@/lib/osrs/types";
 
 const DEFAULT_RUNE_COST = 105;
 const PREFERENCES_STORAGE_KEY = "osrs-high-alch-preferences:v1";
+const THEME_STORAGE_KEY = "osrs-high-alch-theme:v1";
 type PageSize = 25 | 50 | 100 | "all";
+type ThemeMode = "system" | "dark" | "light";
 
 type StoredPreferences = {
   pricingMode?: PricingMode;
@@ -52,7 +54,9 @@ export default function Home() {
     Math.floor(Date.now() / 1000),
   );
   const [status, setStatus] = useState("Loading prices...");
+  const [themeMode, setThemeMode] = useState<ThemeMode>("system");
   const hasMountedPreferences = useRef(false);
+  const hasMountedTheme = useRef(false);
 
   useEffect(() => {
     const stored = readStoredPreferences();
@@ -101,6 +105,44 @@ export default function Home() {
     pageSize,
     pricingMode,
   ]);
+
+  useEffect(() => {
+    const storedTheme = readStoredTheme();
+
+    const frame = window.requestAnimationFrame(() => {
+      setThemeMode(storedTheme);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    const applyTheme = () => {
+      const resolvedTheme =
+        themeMode === "system"
+          ? window.matchMedia("(prefers-color-scheme: light)").matches
+            ? "light"
+            : "dark"
+          : themeMode;
+
+      document.documentElement.dataset.theme = resolvedTheme;
+    };
+
+    applyTheme();
+
+    if (hasMountedTheme.current) {
+      window.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+    } else {
+      hasMountedTheme.current = true;
+    }
+
+    if (themeMode !== "system") return;
+
+    const media = window.matchMedia("(prefers-color-scheme: light)");
+    media.addEventListener("change", applyTheme);
+
+    return () => media.removeEventListener("change", applyTheme);
+  }, [themeMode]);
 
   async function loadPrices(forceMessage = false) {
     const response = await fetch("/api/prices");
@@ -245,7 +287,21 @@ export default function Home() {
             <p>Live alch profit with visible price freshness.</p>
           </div>
         </div>
-        <span className="rowCount">{sortedRows.length.toLocaleString()} rows</span>
+        <div className="toolbarActions">
+          <label className="themeControl">
+            Theme
+            <select
+              aria-label="Theme"
+              value={themeMode}
+              onChange={(event) => setThemeMode(event.target.value as ThemeMode)}
+            >
+              <option value="system">System</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
+          <span className="rowCount">{sortedRows.length.toLocaleString()} rows</span>
+        </div>
       </section>
       <section className="dataStatus" aria-label="Price refresh status">
         <button className="refreshButton" onClick={handleManualRefresh} type="button">
@@ -323,4 +379,17 @@ function isPricingMode(value: unknown): value is PricingMode {
 
 function isPageSize(value: unknown): value is PageSize {
   return value === 25 || value === 50 || value === 100 || value === "all";
+}
+
+function readStoredTheme(): ThemeMode {
+  try {
+    const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return isThemeMode(raw) ? raw : "system";
+  } catch {
+    return "system";
+  }
+}
+
+function isThemeMode(value: unknown): value is ThemeMode {
+  return value === "system" || value === "dark" || value === "light";
 }
