@@ -15,7 +15,18 @@ import type { SortKey, SortState } from "@/lib/osrs/table";
 import type { AlchRow, PriceApiPayload, PricingMode } from "@/lib/osrs/types";
 
 const DEFAULT_RUNE_COST = 105;
+const PREFERENCES_STORAGE_KEY = "osrs-high-alch-preferences:v1";
 type PageSize = 25 | 50 | 100 | "all";
+
+type StoredPreferences = {
+  pricingMode?: PricingMode;
+  includeMembers?: boolean;
+  minLimit?: string;
+  minVolume?: string;
+  minProfit?: string;
+  maxProfit?: string;
+  pageSize?: PageSize;
+};
 
 export default function Home() {
   const [rows, setRows] = useState<AlchRow[]>([]);
@@ -41,6 +52,55 @@ export default function Home() {
     Math.floor(Date.now() / 1000),
   );
   const [status, setStatus] = useState("Loading prices...");
+  const hasMountedPreferences = useRef(false);
+
+  useEffect(() => {
+    const stored = readStoredPreferences();
+    if (!stored) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      setPricingMode(stored.pricingMode ?? "recent");
+      setIncludeMembers(stored.includeMembers ?? true);
+      setMinLimit(stored.minLimit ?? "");
+      setMinVolume(stored.minVolume ?? "5");
+      setMinProfit(stored.minProfit ?? "1");
+      setMaxProfit(stored.maxProfit ?? "");
+      setPageSize(stored.pageSize ?? 50);
+      setPage(1);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMountedPreferences.current) {
+      hasMountedPreferences.current = true;
+      return;
+    }
+
+    const preferences: StoredPreferences = {
+      pricingMode,
+      includeMembers,
+      minLimit,
+      minVolume,
+      minProfit,
+      maxProfit,
+      pageSize,
+    };
+
+    window.localStorage.setItem(
+      PREFERENCES_STORAGE_KEY,
+      JSON.stringify(preferences),
+    );
+  }, [
+    includeMembers,
+    maxProfit,
+    minLimit,
+    minProfit,
+    minVolume,
+    pageSize,
+    pricingMode,
+  ]);
 
   async function loadPrices(forceMessage = false) {
     const response = await fetch("/api/prices");
@@ -234,4 +294,33 @@ function parseOptionalNumber(value: string) {
   if (value.trim() === "") return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function readStoredPreferences() {
+  try {
+    const raw = window.localStorage.getItem(PREFERENCES_STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<StoredPreferences>;
+    return {
+      pricingMode: isPricingMode(parsed.pricingMode) ? parsed.pricingMode : undefined,
+      includeMembers:
+        typeof parsed.includeMembers === "boolean" ? parsed.includeMembers : undefined,
+      minLimit: typeof parsed.minLimit === "string" ? parsed.minLimit : undefined,
+      minVolume: typeof parsed.minVolume === "string" ? parsed.minVolume : undefined,
+      minProfit: typeof parsed.minProfit === "string" ? parsed.minProfit : undefined,
+      maxProfit: typeof parsed.maxProfit === "string" ? parsed.maxProfit : undefined,
+      pageSize: isPageSize(parsed.pageSize) ? parsed.pageSize : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function isPricingMode(value: unknown): value is PricingMode {
+  return value === "recent" || value === "stable";
+}
+
+function isPageSize(value: unknown): value is PageSize {
+  return value === 25 || value === 50 || value === 100 || value === "all";
 }
