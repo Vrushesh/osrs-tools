@@ -22,21 +22,21 @@ html[data-theme="dark"] {
 
 html[data-theme="light"] {
   color-scheme: light;
-  --bg: #f4f6f8;
-  --panel: #ffffff;
-  --panel-strong: #edf1f6;
-  --table-head: #e6ebf2;
-  --text: #202833;
-  --muted: #626b76;
-  --line: #cfd6df;
-  --gold: #b9842e;
-  --green: #75bf77;
-  --red: #d36a6a;
-  --blue: #7eb4e4;
+  --bg: #f3ead7;
+  --panel: #fff8e8;
+  --panel-strong: #f0e2c6;
+  --table-head: #ead8b8;
+  --text: #241f18;
+  --muted: #6f6250;
+  --line: #d7c39f;
+  --gold: #b98226;
+  --green: #76bd70;
+  --red: #cf6862;
+  --blue: #7fb2d8;
   --active-text: #071018;
-  --member-bg: #f2e3c2;
-  --limit-bg: #d7dde6;
-  --hover-row: rgba(184, 132, 46, 0.1);
+  --member-bg: #ead6a6;
+  --limit-bg: #e3d4bb;
+  --hover-row: rgba(185, 130, 38, 0.13);
   --profit-text: #071307;
   --loss-text: #250909;
 }
