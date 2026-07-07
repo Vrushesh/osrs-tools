@@ -174,7 +174,7 @@ select {
 .controlsMiddle,
 .filtersContent {
   display: grid;
-  grid-template-columns: auto minmax(150px, 1fr) minmax(150px, 1fr) minmax(270px, 1.4fr);
+  grid-template-columns: auto minmax(130px, 0.8fr) auto minmax(150px, 1fr) minmax(270px, 1.4fr);
   align-items: center;
 }
 
@@ -253,6 +253,14 @@ select {
 
 .checkControl {
   color: var(--text);
+}
+
+.staleToggle {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .sourceHint {
@@ -461,6 +469,20 @@ th {
   font-size: 12px;
 }
 
+.freshnessCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
 .membersMark {
   width: 18px;
   height: 18px;
@@ -530,13 +552,18 @@ tbody tr:hover {
   background: var(--green);
 }
 
+.badge-recent {
+  color: var(--active-text);
+  background: var(--blue);
+}
+
 .badge-aging {
   color: var(--active-text);
   background: var(--gold);
 }
 
 .badge-stale,
-.badge-no-recent-buy-price {
+.badge-unknown {
   color: var(--loss-text);
   background: var(--red);
 }
@@ -644,6 +671,8 @@ tbody tr:hover {
     border: 1px solid var(--line);
     border-radius: 6px;
     cursor: pointer;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .filtersContent {
@@ -669,6 +698,12 @@ tbody tr:hover {
   .compactControl {
     align-items: start;
     flex-direction: column;
+  }
+
+  .staleToggle {
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-start;
   }
 
   .runeControl {

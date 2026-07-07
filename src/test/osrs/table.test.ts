@@ -73,6 +73,23 @@ describe("table helpers", () => {
     ).toEqual(["Red d'hide body"]);
   });
 
+  it("can hide stale rows from the useful list", () => {
+    const enriched = enrichRows(rows, "recent", 127, 1_800_000_000);
+
+    expect(
+      filterRows(enriched, {
+        search: "",
+        includeMembers: true,
+        profitableOnly: false,
+        hideStale: true,
+        minProfit: null,
+        maxProfit: null,
+        minLimit: null,
+        minVolume: null,
+      }).map((row) => row.row.name),
+    ).toEqual(["Ballista limbs", "Red d'hide body"]);
+  });
+
   it("keeps the default useful list to profitable rows with limit and volume", () => {
     const enriched = enrichRows(
       [

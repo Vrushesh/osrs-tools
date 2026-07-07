@@ -31,18 +31,22 @@ export function getFreshness(
   nowSeconds: number,
 ): Freshness {
   if (!tradeTime) {
-    return { label: "No recent buy price", ageSeconds: null };
+    return { bucket: "unknown", label: "No trade", ageSeconds: null };
   }
 
   const ageSeconds = Math.max(0, nowSeconds - tradeTime);
 
   if (ageSeconds < 5 * 60) {
-    return { label: "Fresh", ageSeconds };
+    return { bucket: "fresh", label: "<5m", ageSeconds };
+  }
+
+  if (ageSeconds < 15 * 60) {
+    return { bucket: "recent", label: "5-15m", ageSeconds };
   }
 
   if (ageSeconds <= 30 * 60) {
-    return { label: "Aging", ageSeconds };
+    return { bucket: "aging", label: "15-30m", ageSeconds };
   }
 
-  return { label: "Stale", ageSeconds };
+  return { bucket: "stale", label: ">30m", ageSeconds };
 }

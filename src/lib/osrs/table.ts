@@ -86,7 +86,12 @@ export function filterRows(rows: EnrichedAlchRow[], filters: RowFilters) {
     if (filters.profitableOnly && (entry.profit === null || entry.profit <= 0)) {
       return false;
     }
-    if (filters.hideStale && entry.freshness.label === "Stale") return false;
+    if (
+      filters.hideStale &&
+      (entry.freshness.bucket === "stale" || entry.freshness.bucket === "unknown")
+    ) {
+      return false;
+    }
     if (filters.minProfit !== null && (entry.profit ?? -Infinity) < filters.minProfit) {
       return false;
     }

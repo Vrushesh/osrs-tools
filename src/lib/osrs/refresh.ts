@@ -26,3 +26,11 @@ export function getRefreshState(
 export function shouldFetchOnManualRefresh(state: RefreshState) {
   return state.canFetch;
 }
+
+export function canStartRefresh(
+  state: RefreshState | null,
+  isRefreshing: boolean,
+) {
+  if (isRefreshing) return false;
+  return state ? state.canFetch : true;
+}

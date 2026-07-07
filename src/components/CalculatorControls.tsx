@@ -13,6 +13,8 @@ type Props = {
   setNatureRuneCost: (value: number) => void;
   includeMembers: boolean;
   setIncludeMembers: (value: boolean) => void;
+  hideStale: boolean;
+  setHideStale: (value: boolean) => void;
   minLimit: string;
   setMinLimit: (value: string) => void;
   minVolume: string;
@@ -100,8 +102,9 @@ export function CalculatorControls(props: Props) {
 
       <input className="filtersToggleInput" id="filters-toggle" type="checkbox" />
       <label className="filtersToggle" htmlFor="filters-toggle">
-        Filters: Limit ≥ {props.minLimit || "any"} · 5min Vol ≥{" "}
-        {props.minVolume || "any"} · Profit ≥ {props.minProfit || "any"}
+        Filters: {props.hideStale ? "Fresh trades" : "All ages"} · Limit{" "}
+        {props.minLimit || "any"} · Vol {props.minVolume || "any"} · Profit{" "}
+        {props.minProfit || "any"}+
       </label>
 
       <div className="filtersContent">
@@ -131,6 +134,15 @@ export function CalculatorControls(props: Props) {
             value={props.minLimit}
             onChange={(event) => props.setMinLimit(event.target.value)}
           />
+        </label>
+
+        <label className="checkControl staleToggle">
+          <input
+            checked={props.hideStale}
+            type="checkbox"
+            onChange={(event) => props.setHideStale(event.target.checked)}
+          />
+          Hide stale trades
         </label>
 
         <label className="compactControl">

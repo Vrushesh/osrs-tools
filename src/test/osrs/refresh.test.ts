@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canStartRefresh,
   getRefreshState,
   shouldFetchOnManualRefresh,
 } from "../../lib/osrs/refresh";
@@ -18,5 +19,12 @@ describe("refresh window", () => {
 
     expect(state.secondsUntilRefresh).toBe(0);
     expect(shouldFetchOnManualRefresh(state)).toBe(true);
+  });
+
+  it("blocks refreshes while a request is already in flight", () => {
+    const state = getRefreshState(1_000_000, 1_000_060);
+
+    expect(canStartRefresh(state, true)).toBe(false);
+    expect(canStartRefresh(state, false)).toBe(true);
   });
 });

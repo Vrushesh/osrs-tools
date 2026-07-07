@@ -1,13 +1,22 @@
 export type PricingMode = "recent" | "stable";
 
 export type FreshnessLabel =
-  | "Fresh"
-  | "Aging"
-  | "Stale"
-  | "No recent buy price";
+  | "<5m"
+  | "5-15m"
+  | "15-30m"
+  | ">30m"
+  | "No trade";
+
+export type FreshnessBucket =
+  | "fresh"
+  | "recent"
+  | "aging"
+  | "stale"
+  | "unknown";
 
 export type Freshness = {
   label: FreshnessLabel;
+  bucket: FreshnessBucket;
   ageSeconds: number | null;
 };
 

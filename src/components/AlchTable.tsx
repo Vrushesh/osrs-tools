@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { FreshnessBadge } from "@/components/FreshnessBadge";
 import type { EnrichedAlchRow, SortKey, SortState } from "@/lib/osrs/table";
 import { formatRelativeTime } from "@/lib/osrs/table";
 
@@ -14,7 +15,7 @@ const columns: Array<{ key: SortKey; label: string; className?: string }> = [
   { key: "buy", label: "Buy", className: "numeric" },
   { key: "highalch", label: "High Alch", className: "numeric" },
   { key: "profit", label: "Profit / GE Limit", className: "numeric" },
-  { key: "lastUpdated", label: "Last Updated" },
+  { key: "lastUpdated", label: "Trade Freshness" },
   { key: "volume", label: "5min Volume", className: "numeric" },
 ];
 
@@ -93,7 +94,12 @@ export function AlchTable({ rows, nowSeconds, sort, onSort }: Props) {
                   </span>
                 </div>
               </td>
-              <td>{formatRelativeTime(entry.lastUpdatedTime, nowSeconds)}</td>
+              <td>
+                <div className="freshnessCell">
+                  <span>{formatRelativeTime(entry.lastUpdatedTime, nowSeconds)}</span>
+                  <FreshnessBadge freshness={entry.freshness} />
+                </div>
+              </td>
               <td className="numeric">{formatNumber(entry.volume)}</td>
             </tr>
           ))}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlchTable } from "@/components/AlchTable";
 import { CalculatorControls } from "@/components/CalculatorControls";
-import { getRefreshState } from "@/lib/osrs/refresh";
+import { canStartRefresh, getRefreshState } from "@/lib/osrs/refresh";
 import {
   enrichRows,
   filterRows,
@@ -27,6 +27,7 @@ type StoredPreferences = {
   minVolume?: string;
   minProfit?: string;
   maxProfit?: string;
+  hideStale?: boolean;
   pageSize?: PageSize;
 };
 
@@ -43,6 +44,7 @@ export default function Home() {
   const [minVolume, setMinVolume] = useState("5");
   const [minProfit, setMinProfit] = useState("1");
   const [maxProfit, setMaxProfit] = useState("");
+  const [hideStale, setHideStale] = useState(true);
   const [pageSize, setPageSize] = useState<PageSize>(50);
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState>({
@@ -54,7 +56,9 @@ export default function Home() {
     Math.floor(Date.now() / 1000),
   );
   const [status, setStatus] = useState("Loading prices...");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
+  const refreshInFlight = useRef(false);
   const hasMountedPreferences = useRef(false);
   const hasMountedTheme = useRef(false);
 
@@ -69,6 +73,7 @@ export default function Home() {
       setMinVolume(stored.minVolume ?? "5");
       setMinProfit(stored.minProfit ?? "1");
       setMaxProfit(stored.maxProfit ?? "");
+      setHideStale(stored.hideStale ?? true);
       setPageSize(stored.pageSize ?? 50);
       setPage(1);
     });
@@ -89,6 +94,7 @@ export default function Home() {
       minVolume,
       minProfit,
       maxProfit,
+      hideStale,
       pageSize,
     };
 
@@ -99,6 +105,7 @@ export default function Home() {
   }, [
     includeMembers,
     maxProfit,
+    hideStale,
     minLimit,
     minProfit,
     minVolume,
@@ -145,31 +152,45 @@ export default function Home() {
   }, [themeMode]);
 
   async function loadPrices(forceMessage = false) {
-    const response = await fetch("/api/prices");
+    if (refreshInFlight.current) return;
 
-    if (!response.ok) {
-      setStatus(
-        "Unable to refresh prices. Showing last successful data if available.",
-      );
-      return;
-    }
+    refreshInFlight.current = true;
+    setIsRefreshing(true);
 
-    const payload = (await response.json()) as PriceApiPayload;
-    setRows(payload.rows);
-    if (payload.natureRunePrice !== null) {
-      if (!hasEditedNatureRuneCost.current) {
-        setNatureRuneCost(payload.natureRunePrice);
-        setNatureRuneSourceText(`${payload.natureRunePrice.toLocaleString()} gp live`);
-      } else {
-        setNatureRuneSourceText(
-          `manual override · live ${payload.natureRunePrice.toLocaleString()} gp`,
+    try {
+      const response = await fetch("/api/prices");
+
+      if (!response.ok) {
+        setStatus(
+          "Price feed unavailable. Showing the last successful data if available.",
         );
+        return;
       }
-    } else if (!hasEditedNatureRuneCost.current) {
-      setNatureRuneSourceText(`${DEFAULT_RUNE_COST.toLocaleString()} gp fallback`);
+
+      const payload = (await response.json()) as PriceApiPayload;
+      setRows(payload.rows);
+      if (payload.natureRunePrice !== null) {
+        if (!hasEditedNatureRuneCost.current) {
+          setNatureRuneCost(payload.natureRunePrice);
+          setNatureRuneSourceText(`${payload.natureRunePrice.toLocaleString()} gp live`);
+        } else {
+          setNatureRuneSourceText(
+            `manual override · live ${payload.natureRunePrice.toLocaleString()} gp`,
+          );
+        }
+      } else if (!hasEditedNatureRuneCost.current) {
+        setNatureRuneSourceText(`${DEFAULT_RUNE_COST.toLocaleString()} gp fallback`);
+      }
+      setFetchedAtSeconds(Math.floor(new Date(payload.fetchedAt).getTime() / 1000));
+      setStatus(forceMessage ? "Price feed refreshed." : "Price feed loaded.");
+    } catch {
+      setStatus(
+        "Price feed unavailable. Showing the last successful data if available.",
+      );
+    } finally {
+      refreshInFlight.current = false;
+      setIsRefreshing(false);
     }
-    setFetchedAtSeconds(Math.floor(new Date(payload.fetchedAt).getTime() / 1000));
-    setStatus(forceMessage ? "Prices refreshed." : "Prices loaded.");
   }
 
   useEffect(() => {
@@ -185,7 +206,14 @@ export default function Home() {
       const nextNow = Math.floor(Date.now() / 1000);
       setNowSeconds(nextNow);
 
-      if (fetchedAtSeconds && getRefreshState(fetchedAtSeconds, nextNow).canFetch) {
+      const nextRefreshState = fetchedAtSeconds
+        ? getRefreshState(fetchedAtSeconds, nextNow)
+        : null;
+
+      if (
+        fetchedAtSeconds &&
+        canStartRefresh(nextRefreshState, refreshInFlight.current)
+      ) {
         void loadPrices();
       }
     }, 1000);
@@ -207,7 +235,7 @@ export default function Home() {
       search,
       includeMembers,
       profitableOnly: false,
-      hideStale: false,
+      hideStale,
       minProfit: parseOptionalNumber(minProfit),
       maxProfit: parseOptionalNumber(maxProfit),
       minLimit: parseOptionalNumber(minLimit),
@@ -216,6 +244,7 @@ export default function Home() {
   }, [
     enrichedRows,
     includeMembers,
+    hideStale,
     maxProfit,
     minLimit,
     minProfit,
@@ -247,8 +276,12 @@ export default function Home() {
       : Math.min(sortedRows.length, safePage * pageSize);
 
   function handleManualRefresh() {
-    if (refreshState && !refreshState.canFetch) {
-      setStatus(`Next live refresh in ${refreshState.secondsUntilRefresh}s.`);
+    if (!canStartRefresh(refreshState, isRefreshing)) {
+      setStatus(
+        isRefreshing
+          ? "Refresh already in progress."
+          : `Next feed refresh in ${refreshState?.secondsUntilRefresh ?? 0}s.`,
+      );
       return;
     }
 
@@ -272,8 +305,8 @@ export default function Home() {
   }
 
   const refreshText = refreshState
-    ? status === "Prices loaded." || status === "Prices refreshed."
-      ? `Updated ${refreshState.secondsSinceFetch}s ago`
+    ? status === "Price feed loaded." || status === "Price feed refreshed."
+      ? `Feed checked ${refreshState.secondsSinceFetch}s ago`
       : status
     : status;
 
@@ -304,13 +337,19 @@ export default function Home() {
         </div>
       </section>
       <section className="dataStatus" aria-label="Price refresh status">
-        <button className="refreshButton" onClick={handleManualRefresh} type="button">
-          Refresh prices
+        <button
+          className="refreshButton"
+          disabled={isRefreshing}
+          onClick={handleManualRefresh}
+          type="button"
+        >
+          {isRefreshing ? "Refreshing..." : "Refresh prices"}
         </button>
         <span className="refreshText">{refreshText}</span>
       </section>
       <CalculatorControls
         includeMembers={includeMembers}
+        hideStale={hideStale}
         maxProfit={maxProfit}
         minLimit={minLimit}
         minProfit={minProfit}
@@ -324,6 +363,7 @@ export default function Home() {
         resultStart={resultStart}
         search={search}
         setIncludeMembers={setIncludeMembers}
+        setHideStale={setHideStale}
         setMaxProfit={setMaxProfit}
         setMinLimit={setMinLimit}
         setMinProfit={setMinProfit}
@@ -367,6 +407,7 @@ function readStoredPreferences() {
       minProfit: typeof parsed.minProfit === "string" ? parsed.minProfit : undefined,
       maxProfit: typeof parsed.maxProfit === "string" ? parsed.maxProfit : undefined,
       pageSize: isPageSize(parsed.pageSize) ? parsed.pageSize : undefined,
+      hideStale: typeof parsed.hideStale === "boolean" ? parsed.hideStale : undefined,
     };
   } catch {
     return null;

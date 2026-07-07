@@ -26,9 +26,25 @@ describe("high alch calculations", () => {
   it("labels row freshness", () => {
     const now = 1_800_000_000;
 
-    expect(getFreshness(now - 60, now).label).toBe("Fresh");
-    expect(getFreshness(now - 600, now).label).toBe("Aging");
-    expect(getFreshness(now - 3600, now).label).toBe("Stale");
-    expect(getFreshness(undefined, now).label).toBe("No recent buy price");
+    expect(getFreshness(now - 60, now)).toMatchObject({
+      bucket: "fresh",
+      label: "<5m",
+    });
+    expect(getFreshness(now - 10 * 60, now)).toMatchObject({
+      bucket: "recent",
+      label: "5-15m",
+    });
+    expect(getFreshness(now - 25 * 60, now)).toMatchObject({
+      bucket: "aging",
+      label: "15-30m",
+    });
+    expect(getFreshness(now - 3600, now)).toMatchObject({
+      bucket: "stale",
+      label: ">30m",
+    });
+    expect(getFreshness(undefined, now)).toMatchObject({
+      bucket: "unknown",
+      label: "No trade",
+    });
   });
 });
