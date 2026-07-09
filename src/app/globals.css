@@ -61,13 +61,13 @@ select {
 
 .appShell {
   min-height: 100vh;
-  padding: 24px;
+  padding: 20px 24px 24px;
 }
 
 .toolbar {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto 16px;
+  max-width: 1440px;
+  margin: 0 auto 12px;
   display: flex;
   align-items: end;
   justify-content: space-between;
@@ -101,7 +101,7 @@ select {
 
 .toolbar h1 {
   margin: 0 0 6px;
-  font-size: 32px;
+  font-size: clamp(24px, 2.4vw, 32px);
   line-height: 1.1;
   overflow-wrap: anywhere;
 }
@@ -121,13 +121,24 @@ select {
 .rowCount {
   color: var(--gold);
   font-size: 14px;
+  font-weight: 800;
   white-space: nowrap;
+}
+
+.planToggle {
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .dataStatus {
   width: 100%;
-  max-width: 1280px;
-  margin: -6px auto 12px;
+  max-width: 1440px;
+  margin: -2px auto 12px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -136,9 +147,9 @@ select {
 
 .controlsPanel {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto 16px;
-  padding: 12px 16px;
+  padding: 12px 16px 14px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -174,14 +185,14 @@ select {
 .controlsMiddle,
 .filtersContent {
   display: grid;
-  grid-template-columns: auto minmax(130px, 0.8fr) auto minmax(150px, 1fr) minmax(270px, 1.4fr);
+  grid-template-columns: auto minmax(126px, 0.7fr) auto minmax(150px, 0.8fr) minmax(260px, 1.2fr);
   align-items: center;
 }
 
 .controlsBottom {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) auto auto auto;
-  gap: 14px;
+  grid-template-columns: minmax(320px, 1fr) auto auto auto;
+  gap: 12px;
 }
 
 .filtersContent {
@@ -237,13 +248,13 @@ select {
 
 .compactControl {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   justify-content: flex-end;
 }
 
 .compactControl input {
-  width: 92px;
+  width: 86px;
   font-weight: 400;
 }
 
@@ -328,6 +339,11 @@ select {
 }
 
 .refreshButton {
+  color: var(--text);
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 11px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 700;
@@ -347,7 +363,7 @@ select {
 
 .paginationSummary {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -384,7 +400,7 @@ select {
 
 .tableWrap {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
   overflow: auto;
   border: 1px solid var(--line);
@@ -392,19 +408,21 @@ select {
   background: var(--panel);
 }
 
-table {
+.alchTable {
   width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 1060px;
   font-variant-numeric: tabular-nums;
+  table-layout: fixed;
 }
 
 th,
 td {
-  padding: 8px 14px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
 th {
@@ -416,8 +434,68 @@ th {
   line-height: 1.2;
 }
 
+.alchTable th:nth-child(1),
+.alchTable td:nth-child(1) {
+  width: 44px;
+}
+
+.alchTable th:nth-child(2),
+.alchTable td:nth-child(2) {
+  width: 34%;
+}
+
+.alchTable th:nth-child(3),
+.alchTable td:nth-child(3),
+.alchTable th:nth-child(4),
+.alchTable td:nth-child(4),
+.alchTable th:nth-child(7),
+.alchTable td:nth-child(7) {
+  width: 10%;
+}
+
+.alchTable th:nth-child(5),
+.alchTable td:nth-child(5) {
+  width: 16%;
+}
+
+.alchTable th:nth-child(6),
+.alchTable td:nth-child(6) {
+  width: 20%;
+}
+
 .numeric {
   text-align: right;
+}
+
+.planColumn {
+  text-align: center;
+}
+
+.addPlanButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--text);
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.addPlanButton.planned {
+  color: var(--profit-text);
+  background: var(--green);
+  border-color: transparent;
+}
+
+.addPlanButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .sortHeader {
@@ -454,9 +532,14 @@ th {
   min-width: 0;
 }
 
+.itemCell > span:not(.membersMark) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .itemIcon {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -473,6 +556,7 @@ th {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .badge {
@@ -504,18 +588,25 @@ th {
 
 .profitPill,
 .lossPill {
-  min-width: 44px;
+  min-width: 42px;
 }
 
 tbody tr:hover {
   background: var(--hover-row);
 }
 
+.emptyTableCell {
+  padding: 28px 16px;
+  color: var(--muted);
+  text-align: center;
+  white-space: normal;
+}
+
 .profitCell {
   display: inline-flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   width: 100%;
 }
 
@@ -533,11 +624,23 @@ tbody tr:hover {
   align-items: center;
   gap: 3px;
   min-width: 0;
-  padding: 3px 6px;
+  padding: 3px 5px;
   color: var(--text);
   background: var(--limit-bg);
   font-size: 12px;
   opacity: 0.82;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .limitLabel {
@@ -568,9 +671,187 @@ tbody tr:hover {
   background: var(--red);
 }
 
+.planScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.28);
+  border: 0;
+}
+
+.planDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100vw);
+  padding: 18px;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  box-shadow: -16px 0 42px rgba(0, 0, 0, 0.22);
+  transform: translateX(100%);
+  transition: transform 160ms ease;
+}
+
+.planDrawer.open {
+  transform: translateX(0);
+}
+
+.planHeader,
+.planItemTop,
+.quantityRow,
+.planActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.planHeader {
+  margin-bottom: 14px;
+}
+
+.planHeader h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.planHeader p,
+.emptyPlan p,
+.emptyPlan span,
+.planItemName span,
+.quantityRow span,
+.planMetrics small,
+.planTotals span {
+  color: var(--muted);
+}
+
+.planHeader p,
+.emptyPlan p,
+.emptyPlan span,
+.planItemName span {
+  margin: 0;
+  font-size: 13px;
+}
+
+.iconButton,
+.removePlanItem,
+.planActions button {
+  color: var(--text);
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.emptyPlan {
+  padding: 18px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.planItems {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.planItem {
+  padding: 12px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.planItemName {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.planItemName strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.removePlanItem {
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.quantityRow {
+  margin-top: 10px;
+}
+
+.quantityRow label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.quantityRow input {
+  width: 74px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.planMetrics,
+.planTotals {
+  display: grid;
+  gap: 8px;
+}
+
+.planMetrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 10px;
+}
+
+.planMetrics span,
+.planTotals div {
+  display: grid;
+  gap: 3px;
+}
+
+.planMetrics small,
+.planTotals span {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.planTotals {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.profitTotal {
+  color: var(--green);
+}
+
+.planActions {
+  margin-top: 12px;
+}
+
 @media (max-width: 720px) {
   .appShell {
-    padding: 16px;
+    padding: 14px;
   }
 
   .toolbar,
@@ -755,13 +1036,13 @@ tbody tr:hover {
     justify-self: end;
   }
 
-  table {
-    min-width: 860px;
+  .alchTable {
+    min-width: 900px;
   }
 
   th,
   td {
-    padding: 8px 12px;
+    padding: 7px 10px;
   }
 
   .brandLockup img {
@@ -771,5 +1052,27 @@ tbody tr:hover {
 
   .paginationSummary {
     margin-left: 0;
+  }
+
+  .planDrawer {
+    top: auto;
+    left: 0;
+    width: 100%;
+    max-height: 84vh;
+    padding-bottom: 34px;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -16px 42px rgba(0, 0, 0, 0.24);
+    transform: translateY(100%);
+  }
+
+  .planDrawer.open {
+    transform: translateY(0);
+  }
+
+  .planMetrics,
+  .planTotals {
+    grid-template-columns: 1fr 1fr;
   }
 }

@@ -2,8 +2,14 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AlchPlanDrawer } from "@/components/AlchPlanDrawer";
 import { AlchTable } from "@/components/AlchTable";
 import { CalculatorControls } from "@/components/CalculatorControls";
+import {
+  buildAlchPlan,
+  getDefaultPlanQuantity,
+} from "@/lib/osrs/plan";
+import type { PlanQuantities } from "@/lib/osrs/plan";
 import { canStartRefresh, getRefreshState } from "@/lib/osrs/refresh";
 import {
   enrichRows,
@@ -12,6 +18,7 @@ import {
   sortRows,
 } from "@/lib/osrs/table";
 import type { SortKey, SortState } from "@/lib/osrs/table";
+import type { EnrichedAlchRow } from "@/lib/osrs/table";
 import type { AlchRow, PriceApiPayload, PricingMode } from "@/lib/osrs/types";
 
 const DEFAULT_RUNE_COST = 105;
@@ -45,7 +52,7 @@ export default function Home() {
   const [minProfit, setMinProfit] = useState("1");
   const [maxProfit, setMaxProfit] = useState("");
   const [hideStale, setHideStale] = useState(true);
-  const [pageSize, setPageSize] = useState<PageSize>(50);
+  const [pageSize, setPageSize] = useState<PageSize>(100);
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState>({
     key: "profit",
@@ -58,6 +65,9 @@ export default function Home() {
   const [status, setStatus] = useState("Loading prices...");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
+  const [planItemIds, setPlanItemIds] = useState<number[]>([]);
+  const [planQuantities, setPlanQuantities] = useState<PlanQuantities>({});
+  const [isPlanOpen, setIsPlanOpen] = useState(false);
   const refreshInFlight = useRef(false);
   const hasMountedPreferences = useRef(false);
   const hasMountedTheme = useRef(false);
@@ -74,7 +84,7 @@ export default function Home() {
       setMinProfit(stored.minProfit ?? "1");
       setMaxProfit(stored.maxProfit ?? "");
       setHideStale(stored.hideStale ?? true);
-      setPageSize(stored.pageSize ?? 50);
+      setPageSize(stored.pageSize ?? 100);
       setPage(1);
     });
 
@@ -257,6 +267,29 @@ export default function Home() {
     [filteredRows, sort],
   );
 
+  const planIdSet = useMemo(() => new Set(planItemIds), [planItemIds]);
+  const enrichedRowsById = useMemo(
+    () => new Map(enrichedRows.map((entry) => [entry.row.id, entry])),
+    [enrichedRows],
+  );
+  const planEntries = useMemo(
+    () =>
+      planItemIds.flatMap((itemId) => {
+        const entry = enrichedRowsById.get(itemId);
+        return entry ? [entry] : [];
+      }),
+    [enrichedRowsById, planItemIds],
+  );
+  const alchPlan = useMemo(
+    () =>
+      buildAlchPlan({
+        entries: planEntries,
+        quantities: planQuantities,
+        natureRuneCost,
+      }),
+    [natureRuneCost, planEntries, planQuantities],
+  );
+
   const totalPages =
     pageSize === "all" ? 1 : Math.max(1, Math.ceil(sortedRows.length / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -304,6 +337,49 @@ export default function Home() {
     });
   }
 
+  function handleAddToPlan(entry: EnrichedAlchRow) {
+    if (entry.buyPrice === null || entry.profit === null) return;
+
+    setPlanItemIds((current) =>
+      current.includes(entry.row.id) ? current : [...current, entry.row.id],
+    );
+    setPlanQuantities((current) => ({
+      ...current,
+      [entry.row.id]: current[entry.row.id] ?? getDefaultPlanQuantity(entry),
+    }));
+    setIsPlanOpen(true);
+  }
+
+  function handlePlanQuantityChange(itemId: number, quantity: number) {
+    const safeQuantity = Number.isFinite(quantity)
+      ? Math.max(0, Math.floor(quantity))
+      : 0;
+
+    if (safeQuantity === 0) {
+      handleRemoveFromPlan(itemId);
+      return;
+    }
+
+    setPlanQuantities((current) => ({
+      ...current,
+      [itemId]: safeQuantity,
+    }));
+  }
+
+  function handleRemoveFromPlan(itemId: number) {
+    setPlanItemIds((current) => current.filter((id) => id !== itemId));
+    setPlanQuantities((current) => {
+      const next = { ...current };
+      delete next[itemId];
+      return next;
+    });
+  }
+
+  function handleClearPlan() {
+    setPlanItemIds([]);
+    setPlanQuantities({});
+  }
+
   const refreshText = refreshState
     ? status === "Price feed loaded." || status === "Price feed refreshed."
       ? `Feed checked ${refreshState.secondsSinceFetch}s ago`
@@ -334,6 +410,13 @@ export default function Home() {
             </select>
           </label>
           <span className="rowCount">{sortedRows.length.toLocaleString()} rows</span>
+          <button
+            className="planToggle"
+            onClick={() => setIsPlanOpen(true)}
+            type="button"
+          >
+            Plan {alchPlan.totals.itemCount}
+          </button>
         </div>
       </section>
       <section className="dataStatus" aria-label="Price refresh status">
@@ -378,9 +461,19 @@ export default function Home() {
       />
       <AlchTable
         nowSeconds={nowSeconds}
+        planItemIds={planIdSet}
         rows={paginatedRows}
         sort={sort}
+        onAddToPlan={handleAddToPlan}
         onSort={handleSort}
+      />
+      <AlchPlanDrawer
+        isOpen={isPlanOpen}
+        plan={alchPlan}
+        onClear={handleClearPlan}
+        onClose={() => setIsPlanOpen(false)}
+        onQuantityChange={handlePlanQuantityChange}
+        onRemove={handleRemoveFromPlan}
       />
     </main>
   );

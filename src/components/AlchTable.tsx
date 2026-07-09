@@ -6,7 +6,9 @@ import { formatRelativeTime } from "@/lib/osrs/table";
 type Props = {
   rows: EnrichedAlchRow[];
   nowSeconds: number;
+  planItemIds: ReadonlySet<number>;
   sort: SortState;
+  onAddToPlan: (entry: EnrichedAlchRow) => void;
   onSort: (key: SortKey) => void;
 };
 
@@ -14,9 +16,9 @@ const columns: Array<{ key: SortKey; label: string; className?: string }> = [
   { key: "item", label: "Item" },
   { key: "buy", label: "Buy", className: "numeric" },
   { key: "highalch", label: "High Alch", className: "numeric" },
-  { key: "profit", label: "Profit / GE Limit", className: "numeric" },
-  { key: "lastUpdated", label: "Trade Freshness" },
-  { key: "volume", label: "5min Volume", className: "numeric" },
+  { key: "profit", label: "Profit", className: "numeric" },
+  { key: "lastUpdated", label: "Updated" },
+  { key: "volume", label: "5 min Vol", className: "numeric" },
 ];
 
 function formatNumber(value: number | null) {
@@ -28,12 +30,22 @@ function getIconUrl(icon: string) {
   return `https://oldschool.runescape.wiki/images/${encodeURIComponent(icon).replaceAll("%20", "_")}`;
 }
 
-export function AlchTable({ rows, nowSeconds, sort, onSort }: Props) {
+export function AlchTable({
+  nowSeconds,
+  onAddToPlan,
+  onSort,
+  planItemIds,
+  rows,
+  sort,
+}: Props) {
   return (
     <div className="tableWrap">
-      <table>
+      <table className="alchTable">
         <thead>
           <tr>
+            <th className="planColumn">
+              <span className="srOnly">Alch plan</span>
+            </th>
             {columns.map((column) => (
               <th className={column.className} key={column.key}>
                 <button
@@ -55,9 +67,43 @@ export function AlchTable({ rows, nowSeconds, sort, onSort }: Props) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((entry) => (
-            <tr key={entry.row.id}>
-              <td>
+          {rows.length === 0 ? (
+            <tr>
+              <td className="emptyTableCell" colSpan={columns.length + 1}>
+                No alch candidates match the current filters. Try lowering the
+                volume or profit filters, or showing stale trades.
+              </td>
+            </tr>
+          ) : null}
+          {rows.map((entry) => {
+            const isPlanned = planItemIds.has(entry.row.id);
+            const canAdd = entry.buyPrice !== null && entry.profit !== null;
+
+            return (
+              <tr key={entry.row.id}>
+                <td className="planColumn">
+                  <button
+                    aria-label={
+                      isPlanned
+                        ? `${entry.row.name} is in alch plan`
+                        : `Add ${entry.row.name} to alch plan`
+                    }
+                    className={`addPlanButton ${isPlanned ? "planned" : ""}`}
+                    disabled={!canAdd}
+                    title={
+                      canAdd
+                        ? isPlanned
+                          ? "Added to alch plan"
+                          : "Add to alch plan"
+                        : "Unavailable price"
+                    }
+                    onClick={() => onAddToPlan(entry)}
+                    type="button"
+                  >
+                    <span aria-hidden="true">{isPlanned ? "✓" : "+"}</span>
+                  </button>
+                </td>
+                <td>
                 <div className="itemCell">
                   <Image
                     alt=""
@@ -102,7 +148,8 @@ export function AlchTable({ rows, nowSeconds, sort, onSort }: Props) {
               </td>
               <td className="numeric">{formatNumber(entry.volume)}</td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
