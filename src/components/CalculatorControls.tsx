@@ -146,7 +146,7 @@ export function CalculatorControls(props: Props) {
         </label>
 
         <label className="compactControl">
-          Min 5min Volume
+          Min 5 min Vol
           <input
             min="0"
             placeholder="Min"
