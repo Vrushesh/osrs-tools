@@ -703,7 +703,8 @@ tbody tr:hover {
 .planHeader,
 .planItemTop,
 .quantityRow,
-.planActions {
+.planActions,
+.planBudget {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -723,6 +724,7 @@ tbody tr:hover {
 .emptyPlan p,
 .emptyPlan span,
 .planItemName span,
+.planBudget span,
 .quantityRow span,
 .planMetrics small,
 .planTotals span {
@@ -747,6 +749,49 @@ tbody tr:hover {
   padding: 7px 10px;
   font-weight: 800;
   cursor: pointer;
+}
+
+.planBudget {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.planBudget label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.planBudget input {
+  width: 118px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.budgetOk,
+.budgetShort {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.budgetOk {
+  color: var(--green);
+}
+
+.budgetShort {
+  color: var(--red);
 }
 
 .emptyPlan {
@@ -1074,5 +1119,15 @@ tbody tr:hover {
   .planMetrics,
   .planTotals {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .planBudget {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .planBudget label,
+  .planBudget input {
+    width: 100%;
   }
 }

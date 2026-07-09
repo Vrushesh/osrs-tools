@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { formatAlchPlanShoppingList } from "@/lib/osrs/plan";
 import type { AlchPlan } from "@/lib/osrs/plan";
 
 type Props = {
@@ -6,6 +7,8 @@ type Props = {
   plan: AlchPlan;
   onClose: () => void;
   onClear: () => void;
+  cashStack: string;
+  onCashStackChange: (value: string) => void;
   onQuantityChange: (itemId: number, quantity: number) => void;
   onRemove: (itemId: number) => void;
 };
@@ -33,13 +36,21 @@ function formatCompact(value: number) {
 }
 
 export function AlchPlanDrawer({
+  cashStack,
   isOpen,
+  onCashStackChange,
   onClear,
   onClose,
   onQuantityChange,
   onRemove,
   plan,
 }: Props) {
+  async function handleCopyPlan() {
+    if (plan.items.length === 0) return;
+
+    await navigator.clipboard.writeText(formatAlchPlanShoppingList(plan));
+  }
+
   return (
     <>
       {isOpen ? (
@@ -72,6 +83,30 @@ export function AlchPlanDrawer({
           </div>
         ) : (
           <>
+            <div className="planBudget">
+              <label>
+                Cash stack
+                <input
+                  min="0"
+                  placeholder="Optional gp"
+                  type="number"
+                  value={cashStack}
+                  onChange={(event) => onCashStackChange(event.target.value)}
+                />
+              </label>
+              {plan.budget.cashStack === null ? (
+                <span>Enter cash to check affordability.</span>
+              ) : plan.budget.isAffordable ? (
+                <strong className="budgetOk">
+                  Fits with {formatCompact(plan.budget.remainingCash)} spare
+                </strong>
+              ) : (
+                <strong className="budgetShort">
+                  Short {formatCompact(plan.budget.shortfall)}
+                </strong>
+              )}
+            </div>
+
             <div className="planItems">
               {plan.items.map((item) => (
                 <section className="planItem" key={item.id}>
@@ -145,6 +180,10 @@ export function AlchPlanDrawer({
                 <strong className="profitTotal">+{formatCompact(plan.totals.profit)}</strong>
               </div>
               <div>
+                <span>4h buy cycle</span>
+                <strong>+{formatCompact(plan.totals.profit)}</strong>
+              </div>
+              <div>
                 <span>Nature runes</span>
                 <strong>{formatNumber(plan.totals.natureRunes)}</strong>
               </div>
@@ -155,6 +194,9 @@ export function AlchPlanDrawer({
             </div>
 
             <div className="planActions">
+              <button onClick={handleCopyPlan} type="button">
+                Copy list
+              </button>
               <button onClick={onClear} type="button">
                 Clear plan
               </button>

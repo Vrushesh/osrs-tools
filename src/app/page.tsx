@@ -67,6 +67,7 @@ export default function Home() {
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
   const [planItemIds, setPlanItemIds] = useState<number[]>([]);
   const [planQuantities, setPlanQuantities] = useState<PlanQuantities>({});
+  const [planCashStack, setPlanCashStack] = useState("");
   const [isPlanOpen, setIsPlanOpen] = useState(false);
   const refreshInFlight = useRef(false);
   const hasMountedPreferences = useRef(false);
@@ -286,8 +287,9 @@ export default function Home() {
         entries: planEntries,
         quantities: planQuantities,
         natureRuneCost,
+        cashStack: parseOptionalNumber(planCashStack),
       }),
-    [natureRuneCost, planEntries, planQuantities],
+    [natureRuneCost, planCashStack, planEntries, planQuantities],
   );
 
   const totalPages =
@@ -474,6 +476,8 @@ export default function Home() {
         onClose={() => setIsPlanOpen(false)}
         onQuantityChange={handlePlanQuantityChange}
         onRemove={handleRemoveFromPlan}
+        cashStack={planCashStack}
+        onCashStackChange={setPlanCashStack}
       />
     </main>
   );

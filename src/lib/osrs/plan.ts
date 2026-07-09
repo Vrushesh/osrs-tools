@@ -26,12 +26,19 @@ export type AlchPlan = {
     profit: number;
     roi: number;
   };
+  budget: {
+    cashStack: number | null;
+    isAffordable: boolean | null;
+    remainingCash: number;
+    shortfall: number;
+  };
 };
 
 type BuildAlchPlanInput = {
   entries: EnrichedAlchRow[];
   quantities: PlanQuantities;
   natureRuneCost: number;
+  cashStack?: number | null;
 };
 
 export function getDefaultPlanQuantity(entry: EnrichedAlchRow) {
@@ -39,6 +46,7 @@ export function getDefaultPlanQuantity(entry: EnrichedAlchRow) {
 }
 
 export function buildAlchPlan({
+  cashStack = null,
   entries,
   quantities,
   natureRuneCost,
@@ -96,5 +104,49 @@ export function buildAlchPlan({
       ...totals,
       roi: totals.capital > 0 ? totals.profit / totals.capital : 0,
     },
+    budget: buildBudget(totals.capital, cashStack),
   };
+}
+
+export function formatAlchPlanShoppingList(plan: AlchPlan) {
+  const itemLines = plan.items.map(
+    (item) =>
+      `${item.name} x${formatNumber(item.quantity)} - buy ${formatNumber(
+        item.buyPrice,
+      )} gp ea`,
+  );
+
+  return [
+    "OSRS High Alch Plan",
+    ...itemLines,
+    `Nature rune x${formatNumber(plan.totals.natureRunes)}`,
+    `Capital: ${formatNumber(plan.totals.capital)} gp`,
+    `Expected profit: ${formatNumber(plan.totals.profit)} gp`,
+  ].join("\n");
+}
+
+function buildBudget(totalCapital: number, cashStack: number | null) {
+  if (cashStack === null || !Number.isFinite(cashStack)) {
+    return {
+      cashStack: null,
+      isAffordable: null,
+      remainingCash: 0,
+      shortfall: 0,
+    };
+  }
+
+  const safeCashStack = Math.max(0, Math.floor(cashStack));
+  const remainingCash = Math.max(0, safeCashStack - totalCapital);
+  const shortfall = Math.max(0, totalCapital - safeCashStack);
+
+  return {
+    cashStack: safeCashStack,
+    isAffordable: shortfall === 0,
+    remainingCash,
+    shortfall,
+  };
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("en-US").format(Math.round(value));
 }

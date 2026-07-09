@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAlchPlan } from "../../lib/osrs/plan";
+import { buildAlchPlan, formatAlchPlanShoppingList } from "../../lib/osrs/plan";
 import type { EnrichedAlchRow } from "../../lib/osrs/table";
 
 const baseEntry: EnrichedAlchRow = {
@@ -72,5 +72,34 @@ describe("alch plan", () => {
     expect(plan.items.map((item) => item.name)).toEqual(["Rune warhammer"]);
     expect(plan.totals.quantity).toBe(12);
     expect(plan.totals.capital).toBe((23898 + 130) * 12);
+  });
+
+  it("summarizes whether the plan fits inside a cash stack", () => {
+    const plan = buildAlchPlan({
+      entries: [baseEntry],
+      quantities: { 1: 2 },
+      natureRuneCost: 130,
+      cashStack: 40_000,
+    });
+
+    expect(plan.budget).toMatchObject({
+      cashStack: 40_000,
+      isAffordable: false,
+      remainingCash: 0,
+      shortfall: (23898 + 130) * 2 - 40_000,
+    });
+  });
+
+  it("formats a shopping list with items, nature runes, capital, and expected profit", () => {
+    const plan = buildAlchPlan({
+      entries: [baseEntry],
+      quantities: { 1: 2 },
+      natureRuneCost: 130,
+    });
+
+    expect(formatAlchPlanShoppingList(plan)).toContain("Rune warhammer x2");
+    expect(formatAlchPlanShoppingList(plan)).toContain("Nature rune x2");
+    expect(formatAlchPlanShoppingList(plan)).toContain("Capital: 48,056 gp");
+    expect(formatAlchPlanShoppingList(plan)).toContain("Expected profit: 1,748 gp");
   });
 });
