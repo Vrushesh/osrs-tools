@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseWiseOldManPlayer } from "../../lib/osrs/player";
+import { parseHiscoresPlayer, parseWiseOldManPlayer } from "../../lib/osrs/player";
 
 describe("Wise Old Man player parsing", () => {
   it("extracts combat stats from the latest snapshot", () => {
@@ -27,6 +27,7 @@ describe("Wise Old Man player parsing", () => {
       displayName: "Zezima",
       username: "zezima",
       accountType: "regular",
+      source: "wise-old-man",
       totalLevel: 2277,
       combatLevel: 126,
       stats: {
@@ -43,5 +44,44 @@ describe("Wise Old Man player parsing", () => {
 
   it("returns null for malformed player payloads", () => {
     expect(parseWiseOldManPlayer({ displayName: "Bad payload" })).toBeNull();
+  });
+});
+
+describe("Official hiscores player parsing", () => {
+  it("extracts combat stats from the index_lite response", () => {
+    const player = parseHiscoresPlayer(
+      "AomineKun",
+      [
+        "931102,1800,51609971",
+        "1115621,83,2798698",
+        "1025692,83,2700241",
+        "1171234,82,2560000",
+        "923456,87,4000000",
+        "1000000,75,1210421",
+        "800000,70,737627",
+        "900000,80,1986068",
+      ].join("\n"),
+    );
+
+    expect(player).toMatchObject({
+      displayName: "AomineKun",
+      username: "AomineKun",
+      accountType: "regular",
+      source: "official-hiscores",
+      totalLevel: 1800,
+      stats: {
+        attack: 83,
+        strength: 82,
+        defence: 83,
+        hitpoints: 87,
+        ranged: 75,
+        magic: 80,
+        prayer: 70,
+      },
+    });
+  });
+
+  it("returns null for malformed hiscores payloads", () => {
+    expect(parseHiscoresPlayer("Bad payload", "<html>not csv</html>")).toBeNull();
   });
 });

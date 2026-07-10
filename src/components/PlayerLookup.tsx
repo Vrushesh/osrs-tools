@@ -38,7 +38,7 @@ export function PlayerLookup() {
   const [username, setUsername] = useState("");
   const [loadedPlayer, setLoadedPlayer] = useState<PlayerProfile | null>(null);
   const [stats, setStats] = useState<CombatStats>(DEFAULT_STATS);
-  const [status, setStatus] = useState("Use Wise Old Man or edit stats manually.");
+  const [status, setStatus] = useState("Look up a player or edit stats manually.");
   const [isLoading, setIsLoading] = useState(false);
 
   const combatLevel = useMemo(() => calculateCombatLevel(stats), [stats]);
@@ -54,7 +54,7 @@ export function PlayerLookup() {
     }
 
     setIsLoading(true);
-    setStatus("Looking up Wise Old Man...");
+    setStatus("Looking up player stats...");
 
     try {
       const response = await fetch(
@@ -70,7 +70,7 @@ export function PlayerLookup() {
 
       setLoadedPlayer(payload.player);
       setStats(payload.player.stats);
-      setStatus("Stats loaded from Wise Old Man.");
+      setStatus(`Stats loaded from ${formatPlayerSource(payload.player.source)}.`);
     } catch {
       setLoadedPlayer(null);
       setStatus("Player lookup failed. Manual stats still work.");
@@ -95,7 +95,7 @@ export function PlayerLookup() {
       <div className="playerPanelHeader">
         <div>
           <h2>Player Lookup</h2>
-          <p>Fetch WOM stats or edit combat levels.</p>
+          <p>Fetch player stats or edit combat levels.</p>
         </div>
         <div className="combatSummary">
           <span>Combat</span>
@@ -124,7 +124,7 @@ export function PlayerLookup() {
           <strong>{loadedPlayer ? loadedPlayer.displayName : "Manual stats"}</strong>
           <small>
             {loadedPlayer
-              ? `${loadedPlayer.accountType} · total ${loadedPlayer.totalLevel.toLocaleString()}`
+              ? `${formatPlayerSource(loadedPlayer.source)} · total ${loadedPlayer.totalLevel.toLocaleString()}`
               : "Not linked to a player"}
           </small>
         </div>
@@ -166,4 +166,8 @@ export function PlayerLookup() {
 
 function formatSkill(skill: CombatSkill) {
   return skill.charAt(0).toUpperCase() + skill.slice(1);
+}
+
+function formatPlayerSource(source: PlayerProfile["source"]) {
+  return source === "wise-old-man" ? "Wise Old Man" : "official hiscores";
 }

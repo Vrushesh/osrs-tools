@@ -9,6 +9,7 @@ export type PlayerProfile = {
   username: string;
   displayName: string;
   accountType: string;
+  source: "wise-old-man" | "official-hiscores";
   totalLevel: number;
   combatLevel: number;
   stats: CombatStats;
@@ -27,6 +28,17 @@ const SKILL_KEYS = [
   "ranged",
   "magic",
   "prayer",
+] as const;
+
+const HISCORES_SKILL_ORDER = [
+  "overall",
+  "attack",
+  "defence",
+  "strength",
+  "hitpoints",
+  "ranged",
+  "prayer",
+  "magic",
 ] as const;
 
 export function parseWiseOldManPlayer(payload: unknown): PlayerProfile | null {
@@ -52,7 +64,50 @@ export function parseWiseOldManPlayer(payload: unknown): PlayerProfile | null {
     username,
     displayName,
     accountType: getString(payload.type) ?? "unknown",
+    source: "wise-old-man",
     totalLevel,
+    combatLevel: calculateCombatLevel(stats),
+    stats,
+    highAlch: getHighAlchUnlock(stats.magic),
+    nextCombat: getCombatUpgradeHints(stats),
+  };
+}
+
+export function parseHiscoresPlayer(username: string, payload: string): PlayerProfile | null {
+  const rows = payload
+    .trim()
+    .split("\n")
+    .map((line) => line.trim().split(","));
+
+  if (rows.length < HISCORES_SKILL_ORDER.length) return null;
+
+  const levels = new Map<string, number>();
+  for (const [index, skill] of HISCORES_SKILL_ORDER.entries()) {
+    const level = Number(rows[index]?.[1]);
+    if (!Number.isFinite(level) || level < 1) return null;
+    levels.set(skill, level);
+  }
+
+  const stats = {
+    attack: levels.get("attack"),
+    strength: levels.get("strength"),
+    defence: levels.get("defence"),
+    hitpoints: levels.get("hitpoints"),
+    ranged: levels.get("ranged"),
+    magic: levels.get("magic"),
+    prayer: levels.get("prayer"),
+  };
+
+  if (!hasAllCombatStats(stats)) return null;
+
+  const displayName = username.trim();
+
+  return {
+    username: displayName,
+    displayName,
+    accountType: "regular",
+    source: "official-hiscores",
+    totalLevel: levels.get("overall") ?? 0,
     combatLevel: calculateCombatLevel(stats),
     stats,
     highAlch: getHighAlchUnlock(stats.magic),

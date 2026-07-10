@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { parseWiseOldManPlayer } from "@/lib/osrs/player";
+import { parseHiscoresPlayer, parseWiseOldManPlayer } from "@/lib/osrs/player";
 
 const WISE_OLD_MAN_BASE_URL = "https://api.wiseoldman.net/v2";
+const OFFICIAL_HISCORES_URL =
+  "https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -15,45 +17,63 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await fetch(
-      `${WISE_OLD_MAN_BASE_URL}/players/username/${encodeURIComponent(username)}`,
-      {
-        headers: {
-          Accept: "application/json",
-          "User-Agent": "osrs-tools player lookup contact: local",
-        },
-        next: { revalidate: 300 },
-      },
+    const wiseOldManPlayer = await fetchWiseOldManPlayer(username);
+    if (wiseOldManPlayer) return NextResponse.json({ player: wiseOldManPlayer });
+
+    const hiscoresPlayer = await fetchHiscoresPlayer(username);
+    if (hiscoresPlayer) return NextResponse.json({ player: hiscoresPlayer });
+
+    return NextResponse.json(
+      { error: "Player was not found on Wise Old Man or official hiscores." },
+      { status: 404 },
     );
-
-    if (response.status === 404) {
-      return NextResponse.json(
-        { error: "Player was not found on Wise Old Man." },
-        { status: 404 },
-      );
-    }
-
-    const contentType = response.headers.get("content-type") ?? "";
-    if (!response.ok || !contentType.includes("application/json")) {
-      return NextResponse.json(
-        { error: "Wise Old Man lookup is unavailable right now." },
-        { status: 502 },
-      );
-    }
-
-    const player = parseWiseOldManPlayer(await response.json());
-    if (!player) {
-      return NextResponse.json(
-        { error: "Wise Old Man returned an unsupported player response." },
-        { status: 502 },
-      );
-    }
-
-    return NextResponse.json({ player });
   } catch {
     return NextResponse.json(
-      { error: "Wise Old Man lookup is unavailable right now." },
+      { error: "Player lookup is unavailable right now." },
       { status: 502 },
     );
   }
+}
+
+async function fetchWiseOldManPlayer(username: string) {
+  const response = await fetch(
+    `${WISE_OLD_MAN_BASE_URL}/players/username/${encodeURIComponent(username)}`,
+    {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "osrs-tools player lookup contact: local",
+      },
+      next: { revalidate: 300 },
+    },
+  );
+
+  if (response.status === 404) return null;
+
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!response.ok || !contentType.includes("application/json")) {
+    return null;
+  }
+
+  return parseWiseOldManPlayer(await response.json());
+}
+
+async function fetchHiscoresPlayer(username: string) {
+  const url = new URL(OFFICIAL_HISCORES_URL);
+  url.searchParams.set("player", username);
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: "text/plain,text/csv,*/*",
+      "User-Agent": "osrs-tools player lookup contact: local",
+    },
+    next: { revalidate: 300 },
+  });
+
+  if (response.status === 404) return null;
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return parseHiscoresPlayer(username, await response.text());
 }
