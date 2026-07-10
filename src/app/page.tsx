@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AlchPlanDrawer } from "@/components/AlchPlanDrawer";
 import { AlchTable } from "@/components/AlchTable";
 import { CalculatorControls } from "@/components/CalculatorControls";
+import { PlayerLookup } from "@/components/PlayerLookup";
 import {
   buildAlchPlan,
   getDefaultPlanQuantity,
@@ -432,6 +433,7 @@ export default function Home() {
         </button>
         <span className="refreshText">{refreshText}</span>
       </section>
+      <PlayerLookup />
       <CalculatorControls
         includeMembers={includeMembers}
         hideStale={hideStale}

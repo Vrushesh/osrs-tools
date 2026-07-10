@@ -156,6 +156,129 @@ select {
   overflow: hidden;
 }
 
+.playerPanel {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto 16px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.playerPanel input,
+.playerPanel button {
+  color: var(--text);
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+
+.playerPanelHeader,
+.playerLookupForm,
+.playerInsights {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.playerPanelHeader {
+  margin-bottom: 12px;
+}
+
+.playerPanel h2 {
+  margin: 0 0 3px;
+  font-size: 18px;
+}
+
+.playerPanel p,
+.playerLookupForm span,
+.playerInsights span,
+.playerInsights small {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.combatSummary {
+  display: inline-grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+.combatSummary span,
+.playerInsights span {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.combatSummary strong {
+  color: var(--gold);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.playerLookupForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 12px;
+}
+
+.playerLookupForm label,
+.statGrid label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.playerLookupForm button {
+  align-self: end;
+  width: 100%;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.playerLookupForm button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.playerInsights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  margin-bottom: 12px;
+}
+
+.playerInsights > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.playerInsights strong,
+.playerInsights small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+
 .controlsPanel input,
 .controlsPanel button,
 .controlsPanel select {
@@ -901,6 +1024,7 @@ tbody tr:hover {
 
   .toolbar,
   .dataStatus,
+  .playerPanel,
   .controlsPanel,
   .tableWrap {
     width: 100%;
@@ -978,10 +1102,39 @@ tbody tr:hover {
   }
 
   .controlsTop,
+  .playerPanelHeader,
+  .playerLookupForm,
   .controlsBottom {
     display: flex;
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .playerInsights,
+  .statGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .playerLookupForm label,
+  .playerLookupForm input,
+  .playerLookupForm button {
+    width: 100%;
+  }
+
+  .playerLookupForm button {
+    align-self: stretch;
+  }
+
+  .playerLookupForm span {
+    width: 100%;
+  }
+
+  .playerInsights {
+    grid-template-columns: 1fr;
+  }
+
+  .combatSummary {
+    justify-items: start;
   }
 
   .refreshButton {
