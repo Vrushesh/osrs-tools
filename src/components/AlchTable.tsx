@@ -5,6 +5,7 @@ import { formatRelativeTime } from "@/lib/osrs/table";
 
 type Props = {
   rows: EnrichedAlchRow[];
+  emptyMessage: string;
   nowSeconds: number;
   planItemIds: ReadonlySet<number>;
   sort: SortState;
@@ -31,6 +32,7 @@ function getIconUrl(icon: string) {
 }
 
 export function AlchTable({
+  emptyMessage,
   nowSeconds,
   onAddToPlan,
   onSort,
@@ -40,7 +42,7 @@ export function AlchTable({
 }: Props) {
   return (
     <div className="tableWrap">
-      <table className="alchTable">
+      <table className={`alchTable ${rows.length === 0 ? "empty" : ""}`}>
         <thead>
           <tr>
             <th className="planColumn">
@@ -70,8 +72,7 @@ export function AlchTable({
           {rows.length === 0 ? (
             <tr>
               <td className="emptyTableCell" colSpan={columns.length + 1}>
-                No alch candidates match the current filters. Try lowering the
-                volume or profit filters, or showing stale trades.
+                {emptyMessage}
               </td>
             </tr>
           ) : null}

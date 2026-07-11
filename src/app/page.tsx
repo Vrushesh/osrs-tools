@@ -388,6 +388,10 @@ export default function Home() {
       ? `Feed checked ${refreshState.secondsSinceFetch}s ago`
       : status
     : status;
+  const isPriceLoading = rows.length === 0 && status === "Loading prices...";
+  const emptyTableMessage = isPriceLoading
+    ? "Loading live OSRS Wiki prices..."
+    : "No alch candidates match the current filters. Try lowering the volume or profit filters, or showing stale trades.";
 
   return (
     <main className="appShell">
@@ -412,7 +416,9 @@ export default function Home() {
               <option value="light">Light</option>
             </select>
           </label>
-          <span className="rowCount">{sortedRows.length.toLocaleString()} rows</span>
+          <span className="rowCount">
+            {isPriceLoading ? "Loading" : `${sortedRows.length.toLocaleString()} rows`}
+          </span>
           <button
             className="planToggle"
             onClick={() => setIsPlanOpen(true)}
@@ -449,6 +455,7 @@ export default function Home() {
         resultEnd={resultEnd}
         resultStart={resultStart}
         search={search}
+        isPriceLoading={isPriceLoading}
         setIncludeMembers={setIncludeMembers}
         setHideStale={setHideStale}
         setMaxProfit={setMaxProfit}
@@ -464,6 +471,7 @@ export default function Home() {
         totalRows={sortedRows.length}
       />
       <AlchTable
+        emptyMessage={emptyTableMessage}
         nowSeconds={nowSeconds}
         planItemIds={planIdSet}
         rows={paginatedRows}

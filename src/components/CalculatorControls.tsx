@@ -30,6 +30,7 @@ type Props = {
   resultStart: number;
   resultEnd: number;
   totalRows: number;
+  isPriceLoading: boolean;
   setPage: (value: number) => void;
 };
 
@@ -200,12 +201,13 @@ export function CalculatorControls(props: Props) {
         </label>
 
         <span className="paginationSummary">
-          Showing {props.resultStart.toLocaleString()}-
-          {props.resultEnd.toLocaleString()} of {props.totalRows.toLocaleString()}
+          {props.isPriceLoading
+            ? "Loading item prices..."
+            : `Showing ${props.resultStart.toLocaleString()}-${props.resultEnd.toLocaleString()} of ${props.totalRows.toLocaleString()}`}
         </span>
         <div className="pager">
           <button
-            disabled={props.page <= 1}
+            disabled={props.isPriceLoading || props.page <= 1}
             onClick={() => props.setPage(props.page - 1)}
             type="button"
           >
@@ -215,7 +217,7 @@ export function CalculatorControls(props: Props) {
             Page {props.page} of {props.totalPages}
           </span>
           <button
-            disabled={props.page >= props.totalPages}
+            disabled={props.isPriceLoading || props.page >= props.totalPages}
             onClick={() => props.setPage(props.page + 1)}
             type="button"
           >

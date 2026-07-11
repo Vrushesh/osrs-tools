@@ -60,6 +60,8 @@ select {
 }
 
 .appShell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   padding: 20px 24px 24px;
 }
@@ -537,6 +539,10 @@ select {
   min-width: 1060px;
   font-variant-numeric: tabular-nums;
   table-layout: fixed;
+}
+
+.alchTable.empty {
+  min-width: 100%;
 }
 
 th,
@@ -1029,6 +1035,26 @@ tbody tr:hover {
   .tableWrap {
     width: 100%;
     max-width: 100%;
+  }
+
+  .toolbar {
+    order: 1;
+  }
+
+  .dataStatus {
+    order: 2;
+  }
+
+  .controlsPanel {
+    order: 3;
+  }
+
+  .tableWrap {
+    order: 4;
+  }
+
+  .playerPanel {
+    order: 5;
   }
 
   .toolbar {
