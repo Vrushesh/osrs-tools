@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { FILTER_PRESETS } from "@/lib/osrs/filter-presets";
+import type { FilterPresetId } from "@/lib/osrs/filter-presets";
 import type { PricingMode } from "@/lib/osrs/types";
 
 type PageSize = 25 | 50 | 100 | "all";
@@ -31,6 +33,7 @@ type Props = {
   resultEnd: number;
   totalRows: number;
   isPriceLoading: boolean;
+  onApplyFilterPreset: (id: FilterPresetId) => void;
   setPage: (value: number) => void;
 };
 
@@ -107,6 +110,20 @@ export function CalculatorControls(props: Props) {
         {props.minLimit || "any"} · Vol {props.minVolume || "any"} · Profit{" "}
         {props.minProfit || "any"}+
       </label>
+
+      <div className="presetBar" aria-label="Filter presets">
+        <span>Presets</span>
+        {FILTER_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            title={preset.description}
+            type="button"
+            onClick={() => props.onApplyFilterPreset(preset.id)}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
 
       <div className="filtersContent">
         <div className="memberSegment" aria-label="Members item filter">

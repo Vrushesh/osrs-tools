@@ -6,6 +6,8 @@ import { AlchPlanDrawer } from "@/components/AlchPlanDrawer";
 import { AlchTable } from "@/components/AlchTable";
 import { CalculatorControls } from "@/components/CalculatorControls";
 import { PlayerLookup } from "@/components/PlayerLookup";
+import { getFilterPresetValues } from "@/lib/osrs/filter-presets";
+import type { FilterPresetId } from "@/lib/osrs/filter-presets";
 import {
   buildAlchPlan,
   getDefaultPlanQuantity,
@@ -330,6 +332,17 @@ export default function Home() {
     setNatureRuneSourceText("manual override");
   }
 
+  function handleApplyFilterPreset(id: FilterPresetId) {
+    const preset = getFilterPresetValues(id);
+    setIncludeMembers(preset.includeMembers);
+    setHideStale(preset.hideStale);
+    setMinLimit(preset.minLimit);
+    setMinVolume(preset.minVolume);
+    setMinProfit(preset.minProfit);
+    setMaxProfit(preset.maxProfit);
+    setPage(1);
+  }
+
   function handleSort(key: SortKey) {
     setSort((current) => {
       if (current.key !== key) return { key, direction: "desc" };
@@ -456,6 +469,7 @@ export default function Home() {
         resultStart={resultStart}
         search={search}
         isPriceLoading={isPriceLoading}
+        onApplyFilterPreset={handleApplyFilterPreset}
         setIncludeMembers={setIncludeMembers}
         setHideStale={setHideStale}
         setMaxProfit={setMaxProfit}

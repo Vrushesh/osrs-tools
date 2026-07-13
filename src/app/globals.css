@@ -307,6 +307,40 @@ select {
   margin-top: 10px;
 }
 
+.presetBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.presetBar span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.presetBar button {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.presetBar button:hover,
+.presetBar button:focus-visible {
+  background: var(--panel-strong);
+}
+
 .controlsMiddle,
 .filtersContent {
   display: grid;
@@ -1178,6 +1212,10 @@ tbody tr:hover {
     cursor: pointer;
     overflow-wrap: anywhere;
     white-space: normal;
+  }
+
+  .presetBar {
+    padding-bottom: 2px;
   }
 
   .filtersContent {
