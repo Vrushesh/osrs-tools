@@ -90,6 +90,25 @@ describe("table helpers", () => {
     ).toEqual(["Ballista limbs", "Red d'hide body"]);
   });
 
+  it("can filter to watched item ids", () => {
+    const enriched = enrichRows(rows, "recent", 127, 1_800_000_000);
+
+    expect(
+      filterRows(enriched, {
+        search: "",
+        includeMembers: true,
+        profitableOnly: false,
+        hideStale: false,
+        minProfit: null,
+        maxProfit: null,
+        minLimit: null,
+        minVolume: null,
+        watchedOnly: true,
+        watchedItemIds: new Set([2, 999]),
+      }).map((row) => row.row.name),
+    ).toEqual(["Red d'hide body"]);
+  });
+
   it("keeps the default useful list to profitable rows with limit and volume", () => {
     const enriched = enrichRows(
       [

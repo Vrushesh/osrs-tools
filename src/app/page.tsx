@@ -23,10 +23,12 @@ import {
 import type { SortKey, SortState } from "@/lib/osrs/table";
 import type { EnrichedAlchRow } from "@/lib/osrs/table";
 import type { AlchRow, PriceApiPayload, PricingMode } from "@/lib/osrs/types";
+import { parseWatchlistIds, toggleWatchlistId } from "@/lib/osrs/watchlist";
 
 const DEFAULT_RUNE_COST = 105;
 const PREFERENCES_STORAGE_KEY = "osrs-high-alch-preferences:v1";
 const THEME_STORAGE_KEY = "osrs-high-alch-theme:v1";
+const WATCHLIST_STORAGE_KEY = "osrs-high-alch-watchlist:v1";
 type PageSize = 25 | 50 | 100 | "all";
 type ThemeMode = "system" | "dark" | "light";
 
@@ -55,6 +57,7 @@ export default function Home() {
   const [minProfit, setMinProfit] = useState("1");
   const [maxProfit, setMaxProfit] = useState("");
   const [hideStale, setHideStale] = useState(true);
+  const [watchedOnly, setWatchedOnly] = useState(false);
   const [pageSize, setPageSize] = useState<PageSize>(100);
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState>({
@@ -72,9 +75,11 @@ export default function Home() {
   const [planQuantities, setPlanQuantities] = useState<PlanQuantities>({});
   const [planCashStack, setPlanCashStack] = useState("");
   const [isPlanOpen, setIsPlanOpen] = useState(false);
+  const [watchItemIds, setWatchItemIds] = useState<number[]>([]);
   const refreshInFlight = useRef(false);
   const hasMountedPreferences = useRef(false);
   const hasMountedTheme = useRef(false);
+  const hasLoadedWatchlist = useRef(false);
 
   useEffect(() => {
     const stored = readStoredPreferences();
@@ -136,6 +141,20 @@ export default function Home() {
 
     return () => window.cancelAnimationFrame(frame);
   }, []);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setWatchItemIds(parseWatchlistIds(window.localStorage.getItem(WATCHLIST_STORAGE_KEY)));
+      hasLoadedWatchlist.current = true;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedWatchlist.current) return;
+    window.localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchItemIds));
+  }, [watchItemIds]);
 
   useEffect(() => {
     const applyTheme = () => {
@@ -250,6 +269,8 @@ export default function Home() {
       includeMembers,
       profitableOnly: false,
       hideStale,
+      watchedOnly,
+      watchedItemIds: new Set(watchItemIds),
       minProfit: parseOptionalNumber(minProfit),
       maxProfit: parseOptionalNumber(maxProfit),
       minLimit: parseOptionalNumber(minLimit),
@@ -264,6 +285,8 @@ export default function Home() {
     minProfit,
     minVolume,
     search,
+    watchedOnly,
+    watchItemIds,
   ]);
 
   const sortedRows = useMemo(
@@ -272,6 +295,7 @@ export default function Home() {
   );
 
   const planIdSet = useMemo(() => new Set(planItemIds), [planItemIds]);
+  const watchIdSet = useMemo(() => new Set(watchItemIds), [watchItemIds]);
   const enrichedRowsById = useMemo(
     () => new Map(enrichedRows.map((entry) => [entry.row.id, entry])),
     [enrichedRows],
@@ -340,7 +364,22 @@ export default function Home() {
     setMinVolume(preset.minVolume);
     setMinProfit(preset.minProfit);
     setMaxProfit(preset.maxProfit);
+    setWatchedOnly(false);
     setPage(1);
+  }
+
+  function handleToggleWatchedOnly() {
+    setWatchedOnly((current) => !current);
+    setPage(1);
+  }
+
+  function handleToggleWatchItem(itemId: number) {
+    const next = toggleWatchlistId(watchItemIds, itemId);
+    setWatchItemIds(next);
+    if (next.length === 0) {
+      setWatchedOnly(false);
+      setPage(1);
+    }
   }
 
   function handleSort(key: SortKey) {
@@ -470,6 +509,9 @@ export default function Home() {
         search={search}
         isPriceLoading={isPriceLoading}
         onApplyFilterPreset={handleApplyFilterPreset}
+        watchedCount={watchItemIds.length}
+        watchedOnly={watchedOnly}
+        onToggleWatchedOnly={handleToggleWatchedOnly}
         setIncludeMembers={setIncludeMembers}
         setHideStale={setHideStale}
         setMaxProfit={setMaxProfit}
@@ -490,8 +532,10 @@ export default function Home() {
         planItemIds={planIdSet}
         rows={paginatedRows}
         sort={sort}
+        watchItemIds={watchIdSet}
         onAddToPlan={handleAddToPlan}
         onSort={handleSort}
+        onToggleWatch={handleToggleWatchItem}
       />
       <AlchPlanDrawer
         isOpen={isPlanOpen}

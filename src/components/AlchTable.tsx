@@ -9,8 +9,10 @@ type Props = {
   nowSeconds: number;
   planItemIds: ReadonlySet<number>;
   sort: SortState;
+  watchItemIds: ReadonlySet<number>;
   onAddToPlan: (entry: EnrichedAlchRow) => void;
   onSort: (key: SortKey) => void;
+  onToggleWatch: (itemId: number) => void;
 };
 
 const columns: Array<{ key: SortKey; label: string; className?: string }> = [
@@ -39,10 +41,20 @@ export function AlchTable({
   planItemIds,
   rows,
   sort,
+  watchItemIds,
+  onToggleWatch,
 }: Props) {
+  if (rows.length === 0) {
+    return (
+      <div className="tableWrap emptyTableWrap">
+        <div className="emptyTableCell">{emptyMessage}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="tableWrap">
-      <table className={`alchTable ${rows.length === 0 ? "empty" : ""}`}>
+      <table className="alchTable">
         <thead>
           <tr>
             <th className="planColumn">
@@ -69,15 +81,9 @@ export function AlchTable({
           </tr>
         </thead>
         <tbody>
-          {rows.length === 0 ? (
-            <tr>
-              <td className="emptyTableCell" colSpan={columns.length + 1}>
-                {emptyMessage}
-              </td>
-            </tr>
-          ) : null}
           {rows.map((entry) => {
             const isPlanned = planItemIds.has(entry.row.id);
+            const isWatched = watchItemIds.has(entry.row.id);
             const canAdd = entry.buyPrice !== null && entry.profit !== null;
 
             return (
@@ -106,6 +112,19 @@ export function AlchTable({
                 </td>
                 <td>
                 <div className="itemCell">
+                  <button
+                    aria-label={
+                      isWatched
+                        ? `Remove ${entry.row.name} from watchlist`
+                        : `Watch ${entry.row.name}`
+                    }
+                    className={`watchButton ${isWatched ? "watched" : ""}`}
+                    title={isWatched ? "Watched item" : "Watch item"}
+                    type="button"
+                    onClick={() => onToggleWatch(entry.row.id)}
+                  >
+                    <span aria-hidden="true">{isWatched ? "★" : "☆"}</span>
+                  </button>
                   <Image
                     alt=""
                     className="itemIcon"

@@ -26,6 +26,8 @@ export type RowFilters = {
   includeMembers: boolean;
   profitableOnly: boolean;
   hideStale: boolean;
+  watchedOnly?: boolean;
+  watchedItemIds?: ReadonlySet<number>;
   minProfit: number | null;
   maxProfit: number | null;
   minLimit: number | null;
@@ -81,6 +83,12 @@ export function filterRows(rows: EnrichedAlchRow[], filters: RowFilters) {
   const query = filters.search.trim().toLowerCase();
 
   return rows.filter((entry) => {
+    if (
+      filters.watchedOnly &&
+      !filters.watchedItemIds?.has(entry.row.id)
+    ) {
+      return false;
+    }
     if (query && !entry.row.name.toLowerCase().includes(query)) return false;
     if (!filters.includeMembers && entry.row.members) return false;
     if (filters.profitableOnly && (entry.profit === null || entry.profit <= 0)) {

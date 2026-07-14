@@ -34,6 +34,9 @@ type Props = {
   totalRows: number;
   isPriceLoading: boolean;
   onApplyFilterPreset: (id: FilterPresetId) => void;
+  watchedCount: number;
+  watchedOnly: boolean;
+  onToggleWatchedOnly: () => void;
   setPage: (value: number) => void;
 };
 
@@ -109,6 +112,7 @@ export function CalculatorControls(props: Props) {
         Filters: {props.hideStale ? "Fresh trades" : "All ages"} · Limit{" "}
         {props.minLimit || "any"} · Vol {props.minVolume || "any"} · Profit{" "}
         {props.minProfit || "any"}+
+        {props.watchedOnly ? " · Watched" : ""}
       </label>
 
       <div className="presetBar" aria-label="Filter presets">
@@ -123,6 +127,15 @@ export function CalculatorControls(props: Props) {
             {preset.label}
           </button>
         ))}
+        <button
+          className={props.watchedOnly ? "active" : ""}
+          disabled={props.watchedCount === 0}
+          title="Show only watched items"
+          type="button"
+          onClick={props.onToggleWatchedOnly}
+        >
+          Watched {props.watchedCount}
+        </button>
       </div>
 
       <div className="filtersContent">
