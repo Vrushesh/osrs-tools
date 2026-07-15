@@ -929,7 +929,8 @@ tbody tr:hover {
 .planBudget span,
 .quantityRow span,
 .planMetrics small,
-.planTotals span {
+.planTotals span,
+.planRateNote {
   color: var(--muted);
 }
 
@@ -1090,6 +1091,17 @@ tbody tr:hover {
 
 .profitTotal {
   color: var(--green);
+}
+
+.lossTotal {
+  color: var(--red);
+}
+
+.planRateNote {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .planActions {
