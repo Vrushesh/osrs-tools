@@ -1,5 +1,9 @@
 import Image from "next/image";
-import { formatAlchPlanShoppingList } from "@/lib/osrs/plan";
+import {
+  HIGH_ALCH_CASTS_PER_HOUR,
+  formatAlchPlanDuration,
+  formatAlchPlanShoppingList,
+} from "@/lib/osrs/plan";
 import type { AlchPlan } from "@/lib/osrs/plan";
 
 type Props = {
@@ -33,6 +37,14 @@ function formatCompact(value: number) {
   if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`;
   if (abs >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
   return formatNumber(value);
+}
+
+function formatSignedCompact(value: number) {
+  return `${value > 0 ? "+" : ""}${formatCompact(value)}`;
+}
+
+function getProfitClassName(value: number) {
+  return value >= 0 ? "profitTotal" : "lossTotal";
 }
 
 export function AlchPlanDrawer({
@@ -177,11 +189,19 @@ export function AlchPlanDrawer({
               </div>
               <div>
                 <span>Expected profit</span>
-                <strong className="profitTotal">+{formatCompact(plan.totals.profit)}</strong>
+                <strong className={getProfitClassName(plan.totals.profit)}>
+                  {formatSignedCompact(plan.totals.profit)}
+                </strong>
               </div>
               <div>
-                <span>4h buy cycle</span>
-                <strong>+{formatCompact(plan.totals.profit)}</strong>
+                <span>Estimated time</span>
+                <strong>{formatAlchPlanDuration(plan.totals.castTimeSeconds)}</strong>
+              </div>
+              <div>
+                <span>Profit / hr</span>
+                <strong className={getProfitClassName(plan.totals.profitPerHour)}>
+                  {formatSignedCompact(plan.totals.profitPerHour)}
+                </strong>
               </div>
               <div>
                 <span>Nature runes</span>
@@ -191,6 +211,10 @@ export function AlchPlanDrawer({
                 <span>ROI</span>
                 <strong>{percentFormatter.format(plan.totals.roi)}</strong>
               </div>
+              <p className="planRateNote">
+                Assumes {formatNumber(HIGH_ALCH_CASTS_PER_HOUR)} casts/hr;
+                buying and banking time excluded.
+              </p>
             </div>
 
             <div className="planActions">

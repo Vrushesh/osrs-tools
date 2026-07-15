@@ -1,5 +1,7 @@
 import type { EnrichedAlchRow } from "./table";
 
+export const HIGH_ALCH_CASTS_PER_HOUR = 1_200;
+
 export type PlanQuantities = Record<number, number>;
 
 export type AlchPlanItem = {
@@ -25,6 +27,8 @@ export type AlchPlan = {
     capital: number;
     profit: number;
     roi: number;
+    castTimeSeconds: number;
+    profitPerHour: number;
   };
   budget: {
     cashStack: number | null;
@@ -103,6 +107,12 @@ export function buildAlchPlan({
     totals: {
       ...totals,
       roi: totals.capital > 0 ? totals.profit / totals.capital : 0,
+      castTimeSeconds:
+        (totals.quantity / HIGH_ALCH_CASTS_PER_HOUR) * 60 * 60,
+      profitPerHour:
+        totals.quantity > 0
+          ? (totals.profit / totals.quantity) * HIGH_ALCH_CASTS_PER_HOUR
+          : 0,
     },
     budget: buildBudget(totals.capital, cashStack),
   };
@@ -122,7 +132,31 @@ export function formatAlchPlanShoppingList(plan: AlchPlan) {
     `Nature rune x${formatNumber(plan.totals.natureRunes)}`,
     `Capital: ${formatNumber(plan.totals.capital)} gp`,
     `Expected profit: ${formatNumber(plan.totals.profit)} gp`,
+    `Estimated cast time: ${formatAlchPlanDuration(plan.totals.castTimeSeconds)}`,
+    `Profit rate: ${formatNumber(plan.totals.profitPerHour)} gp/hr`,
+    `Rate assumption: ${formatNumber(HIGH_ALCH_CASTS_PER_HOUR)} casts/hr; buying and banking excluded`,
   ].join("\n");
+}
+
+export function formatAlchPlanDuration(seconds: number) {
+  const totalSeconds = Number.isFinite(seconds)
+    ? Math.max(0, Math.round(seconds))
+    : 0;
+  const hours = Math.floor(totalSeconds / 3_600);
+  const minutes = Math.floor((totalSeconds % 3_600) / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  }
+
+  if (minutes > 0) {
+    return remainingSeconds > 0
+      ? `${minutes}m ${remainingSeconds}s`
+      : `${minutes}m`;
+  }
+
+  return `${remainingSeconds}s`;
 }
 
 function buildBudget(totalCapital: number, cashStack: number | null) {

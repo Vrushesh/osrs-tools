@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildAlchPlan, formatAlchPlanShoppingList } from "../../lib/osrs/plan";
+import {
+  HIGH_ALCH_CASTS_PER_HOUR,
+  buildAlchPlan,
+  formatAlchPlanDuration,
+  formatAlchPlanShoppingList,
+} from "../../lib/osrs/plan";
 import type { EnrichedAlchRow } from "../../lib/osrs/table";
 
 const baseEntry: EnrichedAlchRow = {
@@ -90,6 +95,30 @@ describe("alch plan", () => {
     });
   });
 
+  it("estimates casting time and hourly profit at the standard high alch rate", () => {
+    const lowerMarginEntry: EnrichedAlchRow = {
+      ...baseEntry,
+      row: { ...baseEntry.row, id: 2, name: "Adamant platebody" },
+      profit: 100,
+    };
+    const plan = buildAlchPlan({
+      entries: [baseEntry, lowerMarginEntry],
+      quantities: { 1: 400, 2: 200 },
+      natureRuneCost: 130,
+    });
+
+    expect(HIGH_ALCH_CASTS_PER_HOUR).toBe(1_200);
+    expect(plan.totals.castTimeSeconds).toBe(1_800);
+    expect(plan.totals.profitPerHour).toBe((874 * 400 + 100 * 200) * 2);
+  });
+
+  it("formats plan durations without implying more precision than whole seconds", () => {
+    expect(formatAlchPlanDuration(0)).toBe("0s");
+    expect(formatAlchPlanDuration(210)).toBe("3m 30s");
+    expect(formatAlchPlanDuration(3_600)).toBe("1h");
+    expect(formatAlchPlanDuration(5_580)).toBe("1h 33m");
+  });
+
   it("formats a shopping list with items, nature runes, capital, and expected profit", () => {
     const plan = buildAlchPlan({
       entries: [baseEntry],
@@ -101,5 +130,12 @@ describe("alch plan", () => {
     expect(formatAlchPlanShoppingList(plan)).toContain("Nature rune x2");
     expect(formatAlchPlanShoppingList(plan)).toContain("Capital: 48,056 gp");
     expect(formatAlchPlanShoppingList(plan)).toContain("Expected profit: 1,748 gp");
+    expect(formatAlchPlanShoppingList(plan)).toContain("Estimated cast time: 6s");
+    expect(formatAlchPlanShoppingList(plan)).toContain(
+      "Profit rate: 1,048,800 gp/hr",
+    );
+    expect(formatAlchPlanShoppingList(plan)).toContain(
+      "Rate assumption: 1,200 casts/hr; buying and banking excluded",
+    );
   });
 });
