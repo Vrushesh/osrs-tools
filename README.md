@@ -15,6 +15,7 @@ Current features:
 - member item filtering
 - minimum GE limit, minimum 5-minute volume, and profit range filters
 - price freshness and next-refresh status
+- locally saved watchlists and Alch Plans with budget and session economics
 - compact desktop and mobile table layouts
 
 ## Data Source

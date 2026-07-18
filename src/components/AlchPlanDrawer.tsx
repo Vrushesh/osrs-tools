@@ -81,7 +81,7 @@ export function AlchPlanDrawer({
         <div className="planHeader">
           <div>
             <h2>Alch Plan</h2>
-            <p>{plan.totals.itemCount} items selected</p>
+            <p>{plan.totals.itemCount} items selected · saved locally</p>
           </div>
           <button className="iconButton" onClick={onClose} type="button">
             Close
