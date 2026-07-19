@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   HIGH_ALCH_CASTS_PER_HOUR,
+  addWatchedEntriesToPlan,
   buildAlchPlan,
   formatAlchPlanDuration,
   formatAlchPlanShoppingList,
@@ -34,6 +35,58 @@ const baseEntry: EnrichedAlchRow = {
 };
 
 describe("alch plan", () => {
+  it("adds available watched entries without overwriting existing plan quantities", () => {
+    const watchedEntry: EnrichedAlchRow = {
+      ...baseEntry,
+      row: {
+        ...baseEntry.row,
+        id: 2,
+        name: "Adamant platebody",
+        limit: 125,
+      },
+    };
+    const unavailableWatchedEntry: EnrichedAlchRow = {
+      ...baseEntry,
+      row: { ...baseEntry.row, id: 3, name: "Unavailable item" },
+      buyPrice: null,
+      profit: null,
+    };
+
+    expect(
+      addWatchedEntriesToPlan({
+        entries: [baseEntry, watchedEntry, unavailableWatchedEntry],
+        watchedItemIds: new Set([1, 2, 3]),
+        currentItemIds: [1],
+        quantities: { 1: 12 },
+      }),
+    ).toEqual({
+      itemIds: [1, 2],
+      quantities: { 1: 12, 2: 125 },
+      addedCount: 1,
+      eligibleCount: 2,
+    });
+  });
+
+  it("ignores unwatched entries when building a watched-item plan", () => {
+    const unwatchedEntry: EnrichedAlchRow = {
+      ...baseEntry,
+      row: { ...baseEntry.row, id: 2, name: "Unwatched item" },
+    };
+
+    expect(
+      addWatchedEntriesToPlan({
+        entries: [baseEntry, unwatchedEntry],
+        watchedItemIds: new Set([1]),
+        currentItemIds: [],
+        quantities: {},
+      }),
+    ).toMatchObject({
+      itemIds: [1],
+      addedCount: 1,
+      eligibleCount: 1,
+    });
+  });
+
   it("defaults item quantities to the GE limit and totals capital, profit, runes, and ROI", () => {
     const plan = buildAlchPlan({
       entries: [baseEntry],

@@ -45,8 +45,53 @@ type BuildAlchPlanInput = {
   cashStack?: number | null;
 };
 
+type AddWatchedEntriesToPlanInput = {
+  entries: EnrichedAlchRow[];
+  watchedItemIds: ReadonlySet<number>;
+  currentItemIds: number[];
+  quantities: PlanQuantities;
+};
+
 export function getDefaultPlanQuantity(entry: EnrichedAlchRow) {
   return Math.max(1, entry.row.limit ?? 1);
+}
+
+export function addWatchedEntriesToPlan({
+  currentItemIds,
+  entries,
+  quantities,
+  watchedItemIds,
+}: AddWatchedEntriesToPlanInput) {
+  const itemIds = Array.from(new Set(currentItemIds));
+  const selectedItemIds = new Set(itemIds);
+  const nextQuantities = { ...quantities };
+  let addedCount = 0;
+  let eligibleCount = 0;
+
+  for (const entry of entries) {
+    if (
+      !watchedItemIds.has(entry.row.id) ||
+      entry.buyPrice === null ||
+      entry.profit === null
+    ) {
+      continue;
+    }
+
+    eligibleCount += 1;
+    if (selectedItemIds.has(entry.row.id)) continue;
+
+    itemIds.push(entry.row.id);
+    selectedItemIds.add(entry.row.id);
+    nextQuantities[entry.row.id] = getDefaultPlanQuantity(entry);
+    addedCount += 1;
+  }
+
+  return {
+    itemIds,
+    quantities: nextQuantities,
+    addedCount,
+    eligibleCount,
+  };
 }
 
 export function buildAlchPlan({

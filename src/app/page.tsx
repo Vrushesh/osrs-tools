@@ -9,6 +9,7 @@ import { PlayerLookup } from "@/components/PlayerLookup";
 import { getFilterPresetValues } from "@/lib/osrs/filter-presets";
 import type { FilterPresetId } from "@/lib/osrs/filter-presets";
 import {
+  addWatchedEntriesToPlan,
   buildAlchPlan,
   getDefaultPlanQuantity,
 } from "@/lib/osrs/plan";
@@ -443,6 +444,24 @@ export default function Home() {
     }
   }
 
+  function handlePlanWatchedItems() {
+    const nextPlan = addWatchedEntriesToPlan({
+      entries: sortRows(enrichedRows, { key: "profit", direction: "desc" }),
+      watchedItemIds: watchIdSet,
+      currentItemIds: planItemIds,
+      quantities: planQuantities,
+    });
+
+    if (nextPlan.eligibleCount === 0) {
+      setStatus("Watched items need an available price before they can be planned.");
+      return;
+    }
+
+    setPlanItemIds(nextPlan.itemIds);
+    setPlanQuantities(nextPlan.quantities);
+    setIsPlanOpen(true);
+  }
+
   function handleSort(key: SortKey) {
     setSort((current) => {
       if (current.key !== key) return { key, direction: "desc" };
@@ -575,6 +594,7 @@ export default function Home() {
         watchedCount={watchItemIds.length}
         watchedOnly={watchedOnly}
         onToggleWatchedOnly={handleToggleWatchedOnly}
+        onPlanWatched={handlePlanWatchedItems}
         setIncludeMembers={setIncludeMembers}
         setHideStale={setHideStale}
         setMaxProfit={setMaxProfit}

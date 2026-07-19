@@ -37,6 +37,7 @@ type Props = {
   watchedCount: number;
   watchedOnly: boolean;
   onToggleWatchedOnly: () => void;
+  onPlanWatched: () => void;
   setPage: (value: number) => void;
 };
 
@@ -135,6 +136,14 @@ export function CalculatorControls(props: Props) {
           onClick={props.onToggleWatchedOnly}
         >
           Watched {props.watchedCount}
+        </button>
+        <button
+          disabled={props.watchedCount === 0}
+          title="Add all watched items with available prices to the Alch Plan"
+          type="button"
+          onClick={props.onPlanWatched}
+        >
+          Plan watched
         </button>
       </div>
 
