@@ -9,10 +9,16 @@ import { PlayerLookup } from "@/components/PlayerLookup";
 import { getFilterPresetValues } from "@/lib/osrs/filter-presets";
 import type { FilterPresetId } from "@/lib/osrs/filter-presets";
 import {
+  addWatchedEntriesToPlan,
   buildAlchPlan,
   getDefaultPlanQuantity,
 } from "@/lib/osrs/plan";
 import type { PlanQuantities } from "@/lib/osrs/plan";
+import {
+  parseStoredAlchPlan,
+  pruneStoredAlchPlan,
+  serializeStoredAlchPlan,
+} from "@/lib/osrs/plan-storage";
 import { canStartRefresh, getRefreshState } from "@/lib/osrs/refresh";
 import {
   enrichRows,
@@ -26,6 +32,7 @@ import type { AlchRow, PriceApiPayload, PricingMode } from "@/lib/osrs/types";
 import { parseWatchlistIds, toggleWatchlistId } from "@/lib/osrs/watchlist";
 
 const DEFAULT_RUNE_COST = 105;
+const PLAN_STORAGE_KEY = "osrs-high-alch-plan:v1";
 const PREFERENCES_STORAGE_KEY = "osrs-high-alch-preferences:v1";
 const THEME_STORAGE_KEY = "osrs-high-alch-theme:v1";
 const WATCHLIST_STORAGE_KEY = "osrs-high-alch-watchlist:v1";
@@ -74,6 +81,7 @@ export default function Home() {
   const [planItemIds, setPlanItemIds] = useState<number[]>([]);
   const [planQuantities, setPlanQuantities] = useState<PlanQuantities>({});
   const [planCashStack, setPlanCashStack] = useState("");
+  const [isPlanStorageReady, setIsPlanStorageReady] = useState(false);
   const [isPlanOpen, setIsPlanOpen] = useState(false);
   const [watchItemIds, setWatchItemIds] = useState<number[]>([]);
   const refreshInFlight = useRef(false);
@@ -155,6 +163,60 @@ export default function Home() {
     if (!hasLoadedWatchlist.current) return;
     window.localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchItemIds));
   }, [watchItemIds]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const storedPlan = parseStoredAlchPlan(
+        window.localStorage.getItem(PLAN_STORAGE_KEY),
+      );
+      setPlanItemIds(storedPlan.itemIds);
+      setPlanQuantities(storedPlan.quantities);
+      setPlanCashStack(storedPlan.cashStack);
+      setIsPlanStorageReady(true);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (!isPlanStorageReady) return;
+
+    if (planItemIds.length === 0 && planCashStack === "") {
+      window.localStorage.removeItem(PLAN_STORAGE_KEY);
+      return;
+    }
+
+    window.localStorage.setItem(
+      PLAN_STORAGE_KEY,
+      serializeStoredAlchPlan({
+        itemIds: planItemIds,
+        quantities: planQuantities,
+        cashStack: planCashStack,
+      }),
+    );
+  }, [isPlanStorageReady, planCashStack, planItemIds, planQuantities]);
+
+  useEffect(() => {
+    if (!isPlanStorageReady || rows.length === 0) return;
+
+    const prunedPlan = pruneStoredAlchPlan(
+      {
+        itemIds: planItemIds,
+        quantities: planQuantities,
+        cashStack: planCashStack,
+      },
+      new Set(rows.map((row) => row.id)),
+    );
+
+    if (prunedPlan.itemIds.length === planItemIds.length) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      setPlanItemIds(prunedPlan.itemIds);
+      setPlanQuantities(prunedPlan.quantities);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isPlanStorageReady, planCashStack, planItemIds, planQuantities, rows]);
 
   useEffect(() => {
     const applyTheme = () => {
@@ -382,6 +444,24 @@ export default function Home() {
     }
   }
 
+  function handlePlanWatchedItems() {
+    const nextPlan = addWatchedEntriesToPlan({
+      entries: sortRows(enrichedRows, { key: "profit", direction: "desc" }),
+      watchedItemIds: watchIdSet,
+      currentItemIds: planItemIds,
+      quantities: planQuantities,
+    });
+
+    if (nextPlan.eligibleCount === 0) {
+      setStatus("Watched items need an available price before they can be planned.");
+      return;
+    }
+
+    setPlanItemIds(nextPlan.itemIds);
+    setPlanQuantities(nextPlan.quantities);
+    setIsPlanOpen(true);
+  }
+
   function handleSort(key: SortKey) {
     setSort((current) => {
       if (current.key !== key) return { key, direction: "desc" };
@@ -433,6 +513,8 @@ export default function Home() {
   function handleClearPlan() {
     setPlanItemIds([]);
     setPlanQuantities({});
+    setPlanCashStack("");
+    window.localStorage.removeItem(PLAN_STORAGE_KEY);
   }
 
   const refreshText = refreshState
@@ -512,6 +594,7 @@ export default function Home() {
         watchedCount={watchItemIds.length}
         watchedOnly={watchedOnly}
         onToggleWatchedOnly={handleToggleWatchedOnly}
+        onPlanWatched={handlePlanWatchedItems}
         setIncludeMembers={setIncludeMembers}
         setHideStale={setHideStale}
         setMaxProfit={setMaxProfit}
