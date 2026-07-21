@@ -45,6 +45,7 @@ type StoredPreferences = {
   minLimit?: string;
   minVolume?: string;
   minProfit?: string;
+  minRoi?: string;
   maxProfit?: string;
   hideStale?: boolean;
   pageSize?: PageSize;
@@ -62,6 +63,7 @@ export default function Home() {
   const [minLimit, setMinLimit] = useState("");
   const [minVolume, setMinVolume] = useState("5");
   const [minProfit, setMinProfit] = useState("1");
+  const [minRoi, setMinRoi] = useState("");
   const [maxProfit, setMaxProfit] = useState("");
   const [hideStale, setHideStale] = useState(true);
   const [watchedOnly, setWatchedOnly] = useState(false);
@@ -99,6 +101,7 @@ export default function Home() {
       setMinLimit(stored.minLimit ?? "");
       setMinVolume(stored.minVolume ?? "5");
       setMinProfit(stored.minProfit ?? "1");
+      setMinRoi(stored.minRoi ?? "");
       setMaxProfit(stored.maxProfit ?? "");
       setHideStale(stored.hideStale ?? true);
       setPageSize(stored.pageSize ?? 100);
@@ -120,6 +123,7 @@ export default function Home() {
       minLimit,
       minVolume,
       minProfit,
+      minRoi,
       maxProfit,
       hideStale,
       pageSize,
@@ -135,6 +139,7 @@ export default function Home() {
     hideStale,
     minLimit,
     minProfit,
+    minRoi,
     minVolume,
     pageSize,
     pricingMode,
@@ -334,6 +339,7 @@ export default function Home() {
       watchedOnly,
       watchedItemIds: new Set(watchItemIds),
       minProfit: parseOptionalNumber(minProfit),
+      minRoi: parseOptionalPercent(minRoi),
       maxProfit: parseOptionalNumber(maxProfit),
       minLimit: parseOptionalNumber(minLimit),
       minVolume: parseOptionalNumber(minVolume),
@@ -345,6 +351,7 @@ export default function Home() {
     maxProfit,
     minLimit,
     minProfit,
+    minRoi,
     minVolume,
     search,
     watchedOnly,
@@ -425,6 +432,7 @@ export default function Home() {
     setMinLimit(preset.minLimit);
     setMinVolume(preset.minVolume);
     setMinProfit(preset.minProfit);
+    setMinRoi(preset.minRoi);
     setMaxProfit(preset.maxProfit);
     setWatchedOnly(false);
     setPage(1);
@@ -580,6 +588,7 @@ export default function Home() {
         maxProfit={maxProfit}
         minLimit={minLimit}
         minProfit={minProfit}
+        minRoi={minRoi}
         minVolume={minVolume}
         natureRuneCost={natureRuneCost}
         natureRuneSourceText={natureRuneSourceText}
@@ -600,6 +609,7 @@ export default function Home() {
         setMaxProfit={setMaxProfit}
         setMinLimit={setMinLimit}
         setMinProfit={setMinProfit}
+        setMinRoi={setMinRoi}
         setMinVolume={setMinVolume}
         setNatureRuneCost={handleNatureRuneCostChange}
         setPage={setPage}
@@ -640,6 +650,11 @@ function parseOptionalNumber(value: string) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function parseOptionalPercent(value: string) {
+  const parsed = parseOptionalNumber(value);
+  return parsed === null ? null : parsed / 100;
+}
+
 function readStoredPreferences() {
   try {
     const raw = window.localStorage.getItem(PREFERENCES_STORAGE_KEY);
@@ -653,6 +668,7 @@ function readStoredPreferences() {
       minLimit: typeof parsed.minLimit === "string" ? parsed.minLimit : undefined,
       minVolume: typeof parsed.minVolume === "string" ? parsed.minVolume : undefined,
       minProfit: typeof parsed.minProfit === "string" ? parsed.minProfit : undefined,
+      minRoi: typeof parsed.minRoi === "string" ? parsed.minRoi : undefined,
       maxProfit: typeof parsed.maxProfit === "string" ? parsed.maxProfit : undefined,
       pageSize: isPageSize(parsed.pageSize) ? parsed.pageSize : undefined,
       hideStale: typeof parsed.hideStale === "boolean" ? parsed.hideStale : undefined,

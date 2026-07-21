@@ -20,6 +20,8 @@ const columns: Array<{ key: SortKey; label: string; className?: string }> = [
   { key: "buy", label: "Buy", className: "numeric" },
   { key: "highalch", label: "High Alch", className: "numeric" },
   { key: "profit", label: "Profit", className: "numeric" },
+  { key: "roi", label: "ROI", className: "numeric" },
+  { key: "potential", label: "Limit Profit", className: "numeric" },
   { key: "lastUpdated", label: "Updated" },
   { key: "volume", label: "5 min Vol", className: "numeric" },
 ];
@@ -27,6 +29,15 @@ const columns: Array<{ key: SortKey; label: string; className?: string }> = [
 function formatNumber(value: number | null) {
   if (value === null) return "Unavailable";
   return new Intl.NumberFormat("en-US").format(Math.round(value));
+}
+
+function formatPercent(value: number | null) {
+  if (value === null) return "Unavailable";
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 1,
+    style: "percent",
+  }).format(value);
 }
 
 function getIconUrl(icon: string) {
@@ -159,6 +170,17 @@ export function AlchTable({
                     {entry.row.limit ?? "-"}
                   </span>
                 </div>
+              </td>
+              <td className="numeric">{formatPercent(entry.roi)}</td>
+              <td
+                className="numeric"
+                title={
+                  entry.row.limit === undefined
+                    ? "GE limit unavailable"
+                    : `Profit across the ${entry.row.limit.toLocaleString()} item GE limit`
+                }
+              >
+                {formatNumber(entry.potential)}
               </td>
               <td>
                 <div className="freshnessCell">

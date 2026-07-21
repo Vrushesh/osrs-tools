@@ -6,6 +6,7 @@ export type FilterPresetValues = {
   minLimit: string;
   minVolume: string;
   minProfit: string;
+  minRoi: string;
   maxProfit: string;
 };
 
@@ -27,6 +28,7 @@ export const FILTER_PRESETS: FilterPreset[] = [
       minLimit: "",
       minVolume: "5",
       minProfit: "1",
+      minRoi: "",
       maxProfit: "",
     },
   },
@@ -40,6 +42,7 @@ export const FILTER_PRESETS: FilterPreset[] = [
       minLimit: "70",
       minVolume: "25",
       minProfit: "100",
+      minRoi: "",
       maxProfit: "",
     },
   },
@@ -53,6 +56,7 @@ export const FILTER_PRESETS: FilterPreset[] = [
       minLimit: "",
       minVolume: "5",
       minProfit: "1",
+      minRoi: "",
       maxProfit: "",
     },
   },
@@ -66,6 +70,7 @@ export const FILTER_PRESETS: FilterPreset[] = [
       minLimit: "",
       minVolume: "5",
       minProfit: "500",
+      minRoi: "",
       maxProfit: "",
     },
   },

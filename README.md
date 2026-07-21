@@ -10,10 +10,10 @@ Current features:
 
 - live nature rune pricing with manual override
 - recent and stable pricing modes
-- profit calculation including nature rune cost
+- profit, ROI, and GE-limit potential calculations including nature rune cost
 - item search, sorting, pagination, and row-count controls
 - member item filtering
-- minimum GE limit, minimum 5-minute volume, and profit range filters
+- minimum GE limit, minimum 5-minute volume, ROI, and profit range filters
 - price freshness and next-refresh status
 - locally saved watchlists and Alch Plans with budget and session economics
 - compact desktop and mobile table layouts

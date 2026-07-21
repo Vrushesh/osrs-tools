@@ -11,6 +11,8 @@ export type SortKey =
   | "buy"
   | "highalch"
   | "profit"
+  | "roi"
+  | "potential"
   | "lastUpdated"
   | "volume";
 
@@ -28,6 +30,7 @@ export type RowFilters = {
   hideStale: boolean;
   watchedOnly?: boolean;
   watchedItemIds?: ReadonlySet<number>;
+  minRoi: number | null;
   minProfit: number | null;
   maxProfit: number | null;
   minLimit: number | null;
@@ -98,6 +101,9 @@ export function filterRows(rows: EnrichedAlchRow[], filters: RowFilters) {
       filters.hideStale &&
       (entry.freshness.bucket === "stale" || entry.freshness.bucket === "unknown")
     ) {
+      return false;
+    }
+    if (filters.minRoi !== null && (entry.roi ?? -Infinity) < filters.minRoi) {
       return false;
     }
     if (filters.minProfit !== null && (entry.profit ?? -Infinity) < filters.minProfit) {
@@ -174,6 +180,10 @@ function getSortValue(row: EnrichedAlchRow, key: SortKey) {
       return row.row.highalch;
     case "profit":
       return row.profit;
+    case "roi":
+      return row.roi;
+    case "potential":
+      return row.potential;
     case "lastUpdated":
       return row.lastUpdatedTime;
     case "volume":

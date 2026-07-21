@@ -65,6 +65,7 @@ describe("table helpers", () => {
         includeMembers: false,
         profitableOnly: true,
         hideStale: false,
+        minRoi: null,
         minProfit: null,
         maxProfit: null,
         minLimit: 50,
@@ -82,6 +83,7 @@ describe("table helpers", () => {
         includeMembers: true,
         profitableOnly: false,
         hideStale: true,
+        minRoi: null,
         minProfit: null,
         maxProfit: null,
         minLimit: null,
@@ -99,6 +101,7 @@ describe("table helpers", () => {
         includeMembers: true,
         profitableOnly: false,
         hideStale: false,
+        minRoi: null,
         minProfit: null,
         maxProfit: null,
         minLimit: null,
@@ -148,6 +151,7 @@ describe("table helpers", () => {
         includeMembers: true,
         profitableOnly: false,
         hideStale: false,
+        minRoi: null,
         minProfit: 1,
         maxProfit: null,
         minLimit: 1,
@@ -164,6 +168,39 @@ describe("table helpers", () => {
         (row) => row.row.name,
       ),
     ).toEqual(["Stale item", "Ballista limbs", "Red d'hide body"]);
+  });
+
+  it("filters by minimum ROI using the total input cost", () => {
+    const enriched = enrichRows(rows, "recent", 127, 1_800_000_000);
+
+    expect(
+      filterRows(enriched, {
+        search: "",
+        includeMembers: true,
+        profitableOnly: false,
+        hideStale: false,
+        minRoi: 0.2,
+        minProfit: null,
+        maxProfit: null,
+        minLimit: null,
+        minVolume: null,
+      }).map((row) => row.row.name),
+    ).toEqual(["Red d'hide body"]);
+  });
+
+  it("sorts rows by ROI and potential GE-limit profit", () => {
+    const enriched = enrichRows(rows, "recent", 127, 1_800_000_000);
+
+    expect(
+      sortRows(enriched, { key: "roi", direction: "desc" }).map(
+        (row) => row.row.name,
+      ),
+    ).toEqual(["Red d'hide body", "Ballista limbs", "Stale item"]);
+    expect(
+      sortRows(enriched, { key: "potential", direction: "desc" }).map(
+        (row) => row.row.name,
+      ),
+    ).toEqual(["Red d'hide body", "Ballista limbs", "Stale item"]);
   });
 
   it("keeps unavailable profit rows below priced rows when sorting descending", () => {
