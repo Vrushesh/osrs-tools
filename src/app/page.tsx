@@ -321,6 +321,23 @@ export default function Home() {
     return () => window.clearInterval(interval);
   }, [fetchedAtSeconds]);
 
+  useEffect(() => {
+    if (!isPlanOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsPlanOpen(false);
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isPlanOpen]);
+
   const refreshState = fetchedAtSeconds
     ? getRefreshState(fetchedAtSeconds, nowSeconds)
     : null;
@@ -423,6 +440,11 @@ export default function Home() {
     hasEditedNatureRuneCost.current = true;
     setNatureRuneCost(value);
     setNatureRuneSourceText("manual override");
+  }
+
+  function updateTableSetting<T>(setter: (value: T) => void, value: T) {
+    setter(value);
+    setPage(1);
   }
 
   function handleApplyFilterPreset(id: FilterPresetId) {
@@ -604,18 +626,22 @@ export default function Home() {
         watchedOnly={watchedOnly}
         onToggleWatchedOnly={handleToggleWatchedOnly}
         onPlanWatched={handlePlanWatchedItems}
-        setIncludeMembers={setIncludeMembers}
-        setHideStale={setHideStale}
-        setMaxProfit={setMaxProfit}
-        setMinLimit={setMinLimit}
-        setMinProfit={setMinProfit}
-        setMinRoi={setMinRoi}
-        setMinVolume={setMinVolume}
-        setNatureRuneCost={handleNatureRuneCostChange}
+        setIncludeMembers={(value) =>
+          updateTableSetting(setIncludeMembers, value)
+        }
+        setHideStale={(value) => updateTableSetting(setHideStale, value)}
+        setMaxProfit={(value) => updateTableSetting(setMaxProfit, value)}
+        setMinLimit={(value) => updateTableSetting(setMinLimit, value)}
+        setMinProfit={(value) => updateTableSetting(setMinProfit, value)}
+        setMinRoi={(value) => updateTableSetting(setMinRoi, value)}
+        setMinVolume={(value) => updateTableSetting(setMinVolume, value)}
+        setNatureRuneCost={(value) =>
+          updateTableSetting(handleNatureRuneCostChange, value)
+        }
         setPage={setPage}
-        setPageSize={setPageSize}
-        setPricingMode={setPricingMode}
-        setSearch={setSearch}
+        setPageSize={(value) => updateTableSetting(setPageSize, value)}
+        setPricingMode={(value) => updateTableSetting(setPricingMode, value)}
+        setSearch={(value) => updateTableSetting(setSearch, value)}
         totalPages={totalPages}
         totalRows={sortedRows.length}
       />

@@ -15,13 +15,28 @@ type Props = {
   onToggleWatch: (itemId: number) => void;
 };
 
-const columns: Array<{ key: SortKey; label: string; className?: string }> = [
-  { key: "item", label: "Item" },
+const columns: Array<{
+  key: SortKey;
+  label: string;
+  className?: string;
+  title?: string;
+}> = [
+  { key: "item", label: "Item", className: "itemColumn" },
   { key: "buy", label: "Buy", className: "numeric" },
   { key: "highalch", label: "High Alch", className: "numeric" },
   { key: "profit", label: "Profit", className: "numeric" },
-  { key: "roi", label: "ROI", className: "numeric" },
-  { key: "potential", label: "Limit Profit", className: "numeric" },
+  {
+    key: "roi",
+    label: "ROI",
+    className: "numeric",
+    title: "Profit divided by item and nature rune cost",
+  },
+  {
+    key: "potential",
+    label: "Limit Profit",
+    className: "numeric",
+    title: "Profit each multiplied by the four-hour GE limit",
+  },
   { key: "lastUpdated", label: "Updated" },
   { key: "volume", label: "5 min Vol", className: "numeric" },
 ];
@@ -68,14 +83,26 @@ export function AlchTable({
       <table className="alchTable">
         <thead>
           <tr>
-            <th className="planColumn">
+            <th className="planColumn" scope="col">
               <span className="srOnly">Alch plan</span>
             </th>
             {columns.map((column) => (
-              <th className={column.className} key={column.key}>
+              <th
+                aria-sort={
+                  sort.key === column.key
+                    ? sort.direction === "asc"
+                      ? "ascending"
+                      : "descending"
+                    : "none"
+                }
+                className={column.className}
+                key={column.key}
+                scope="col"
+              >
                 <button
                   className="sortHeader"
                   onClick={() => onSort(column.key)}
+                  title={column.title}
                   type="button"
                 >
                   <span>{column.label}</span>
@@ -108,6 +135,7 @@ export function AlchTable({
                     }
                     className={`addPlanButton ${isPlanned ? "planned" : ""}`}
                     disabled={!canAdd}
+                    aria-pressed={isPlanned}
                     title={
                       canAdd
                         ? isPlanned
@@ -121,75 +149,81 @@ export function AlchTable({
                     <span aria-hidden="true">{isPlanned ? "✓" : "+"}</span>
                   </button>
                 </td>
-                <td>
-                <div className="itemCell">
-                  <button
-                    aria-label={
-                      isWatched
-                        ? `Remove ${entry.row.name} from watchlist`
-                        : `Watch ${entry.row.name}`
-                    }
-                    className={`watchButton ${isWatched ? "watched" : ""}`}
-                    title={isWatched ? "Watched item" : "Watch item"}
-                    type="button"
-                    onClick={() => onToggleWatch(entry.row.id)}
-                  >
-                    <span aria-hidden="true">{isWatched ? "★" : "☆"}</span>
-                  </button>
-                  <Image
-                    alt=""
-                    className="itemIcon"
-                    height="32"
-                    loading="lazy"
-                    src={getIconUrl(entry.row.icon)}
-                    width="32"
-                  />
-                  <span>{entry.row.name}</span>
-                  {entry.row.members ? (
-                    <span className="membersMark" title="Members item">
-                      M
+                <td className="itemColumn">
+                  <div className="itemCell">
+                    <button
+                      aria-label={
+                        isWatched
+                          ? `Remove ${entry.row.name} from watchlist`
+                          : `Watch ${entry.row.name}`
+                      }
+                      aria-pressed={isWatched}
+                      className={`watchButton ${isWatched ? "watched" : ""}`}
+                      title={isWatched ? "Watched item" : "Watch item"}
+                      type="button"
+                      onClick={() => onToggleWatch(entry.row.id)}
+                    >
+                      <span aria-hidden="true">{isWatched ? "★" : "☆"}</span>
+                    </button>
+                    <Image
+                      alt=""
+                      className="itemIcon"
+                      height="32"
+                      loading="lazy"
+                      src={getIconUrl(entry.row.icon)}
+                      width="32"
+                    />
+                    <span>{entry.row.name}</span>
+                    {entry.row.members ? (
+                      <span className="membersMark" title="Members item">
+                        M
+                      </span>
+                    ) : null}
+                  </div>
+                </td>
+                <td className="numeric">{formatNumber(entry.buyPrice)}</td>
+                <td className="numeric">{formatNumber(entry.row.highalch)}</td>
+                <td className="numeric">
+                  <div className="profitCell">
+                    <span
+                      className={
+                        entry.profit !== null && entry.profit >= 0
+                          ? "profitPill"
+                          : "lossPill"
+                      }
+                    >
+                      {formatNumber(entry.profit)}
                     </span>
-                  ) : null}
-                </div>
-              </td>
-              <td className="numeric">{formatNumber(entry.buyPrice)}</td>
-              <td className="numeric">{formatNumber(entry.row.highalch)}</td>
-              <td className="numeric">
-                <div className="profitCell">
-                  <span
-                    className={
-                      entry.profit !== null && entry.profit >= 0
-                        ? "profitPill"
-                        : "lossPill"
-                    }
-                  >
-                    {formatNumber(entry.profit)}
-                  </span>
-                  <span className="limitPill" title="GE limit: max quantity bought every 4 hours">
-                    <span className="limitLabel">GE</span>
-                    {entry.row.limit ?? "-"}
-                  </span>
-                </div>
-              </td>
-              <td className="numeric">{formatPercent(entry.roi)}</td>
-              <td
-                className="numeric"
-                title={
-                  entry.row.limit === undefined
-                    ? "GE limit unavailable"
-                    : `Profit across the ${entry.row.limit.toLocaleString()} item GE limit`
-                }
-              >
-                {formatNumber(entry.potential)}
-              </td>
-              <td>
-                <div className="freshnessCell">
-                  <span>{formatRelativeTime(entry.lastUpdatedTime, nowSeconds)}</span>
-                  <FreshnessBadge freshness={entry.freshness} />
-                </div>
-              </td>
-              <td className="numeric">{formatNumber(entry.volume)}</td>
-            </tr>
+                    <span
+                      className="limitPill"
+                      title="GE limit: max quantity bought every 4 hours"
+                    >
+                      <span className="limitLabel">GE</span>
+                      {entry.row.limit ?? "-"}
+                    </span>
+                  </div>
+                </td>
+                <td className="numeric">{formatPercent(entry.roi)}</td>
+                <td
+                  className="numeric"
+                  title={
+                    entry.row.limit === undefined
+                      ? "GE limit unavailable"
+                      : `Profit across the ${entry.row.limit.toLocaleString()} item GE limit`
+                  }
+                >
+                  {formatNumber(entry.potential)}
+                </td>
+                <td>
+                  <div className="freshnessCell">
+                    <span>
+                      {formatRelativeTime(entry.lastUpdatedTime, nowSeconds)}
+                    </span>
+                    <FreshnessBadge freshness={entry.freshness} />
+                  </div>
+                </td>
+                <td className="numeric">{formatNumber(entry.volume)}</td>
+              </tr>
             );
           })}
         </tbody>

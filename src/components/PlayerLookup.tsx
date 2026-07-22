@@ -91,76 +91,92 @@ export function PlayerLookup() {
   const bestUpgrades = nextCombat.upgrades.slice(0, 3);
 
   return (
-    <section className="playerPanel" aria-label="Player lookup and combat calculator">
-      <div className="playerPanelHeader">
-        <div>
-          <h2>Player Lookup</h2>
-          <p>Fetch player stats or edit combat levels.</p>
-        </div>
-        <div className="combatSummary">
-          <span>Combat</span>
-          <strong>{combatLevel}</strong>
-        </div>
-      </div>
+    <details className="playerPanel">
+      <summary className="playerPanelToggle">
+        <span className="playerPanelTitle">
+          <strong>Player lookup &amp; combat</strong>
+          <span>Optional tools for stats and High Alch readiness</span>
+        </span>
+        <span className="playerPanelToggleMeta">
+          <span className="combatSummary">
+            <span>Combat</span>
+            <strong>{combatLevel}</strong>
+          </span>
+          <span aria-hidden="true" className="playerPanelChevron">
+            +
+          </span>
+        </span>
+      </summary>
 
-      <form className="playerLookupForm" onSubmit={handleLookup}>
-        <label>
-          RSN
-          <input
-            placeholder="Username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-          />
-        </label>
-        <button disabled={isLoading} type="submit">
-          {isLoading ? "Looking up..." : "Load stats"}
-        </button>
-        <span>{status}</span>
-      </form>
-
-      <div className="playerInsights">
-        <div>
-          <span>Profile</span>
-          <strong>{loadedPlayer ? loadedPlayer.displayName : "Manual stats"}</strong>
-          <small>
-            {loadedPlayer
-              ? `${formatPlayerSource(loadedPlayer.source)} · total ${loadedPlayer.totalLevel.toLocaleString()}`
-              : "Not linked to a player"}
-          </small>
-        </div>
-        <div>
-          <span>High Alch</span>
-          <strong>{highAlch.unlocked ? "Unlocked" : `Need ${highAlch.levelsNeeded}`}</strong>
-          <small>Requires 55 Magic</small>
-        </div>
-        <div>
-          <span>Next combat</span>
-          <strong>{nextCombat.nextLevel}</strong>
-          <small>
-            {bestUpgrades.length
-              ? bestUpgrades
-                  .map((upgrade) => `${formatSkill(upgrade.skill)} +${upgrade.levelsNeeded}`)
-                  .join(" · ")
-              : "Max combat reached"}
-          </small>
-        </div>
-      </div>
-
-      <div className="statGrid">
-        {COMBAT_SKILLS.map((skill) => (
-          <label key={skill.key}>
-            {skill.label}
+      <div className="playerPanelContent">
+        <form className="playerLookupForm" onSubmit={handleLookup}>
+          <label>
+            RSN
             <input
-              max="99"
-              min="1"
-              type="number"
-              value={stats[skill.key]}
-              onChange={(event) => handleStatChange(skill.key, event.target.value)}
+              placeholder="Username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
             />
           </label>
-        ))}
+          <button disabled={isLoading} type="submit">
+            {isLoading ? "Looking up..." : "Load stats"}
+          </button>
+          <span>{status}</span>
+        </form>
+
+        <div className="playerInsights">
+          <div>
+            <span>Profile</span>
+            <strong>
+              {loadedPlayer ? loadedPlayer.displayName : "Manual stats"}
+            </strong>
+            <small>
+              {loadedPlayer
+                ? `${formatPlayerSource(loadedPlayer.source)} · total ${loadedPlayer.totalLevel.toLocaleString()}`
+                : "Not linked to a player"}
+            </small>
+          </div>
+          <div>
+            <span>High Alch</span>
+            <strong>
+              {highAlch.unlocked ? "Unlocked" : `Need ${highAlch.levelsNeeded}`}
+            </strong>
+            <small>Requires 55 Magic</small>
+          </div>
+          <div>
+            <span>Next combat</span>
+            <strong>{nextCombat.nextLevel}</strong>
+            <small>
+              {bestUpgrades.length
+                ? bestUpgrades
+                    .map(
+                      (upgrade) =>
+                        `${formatSkill(upgrade.skill)} +${upgrade.levelsNeeded}`,
+                    )
+                    .join(" · ")
+                : "Max combat reached"}
+            </small>
+          </div>
+        </div>
+
+        <div className="statGrid">
+          {COMBAT_SKILLS.map((skill) => (
+            <label key={skill.key}>
+              {skill.label}
+              <input
+                max="99"
+                min="1"
+                type="number"
+                value={stats[skill.key]}
+                onChange={(event) =>
+                  handleStatChange(skill.key, event.target.value)
+                }
+              />
+            </label>
+          ))}
+        </div>
       </div>
-    </section>
+    </details>
   );
 }
 

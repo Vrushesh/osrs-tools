@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import {
   HIGH_ALCH_CASTS_PER_HOUR,
   formatAlchPlanDuration,
@@ -57,10 +60,38 @@ export function AlchPlanDrawer({
   onRemove,
   plan,
 }: Props) {
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  );
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null;
+      closeButtonRef.current?.focus();
+      return;
+    }
+
+    previousFocusRef.current?.focus();
+    previousFocusRef.current = null;
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (copyStatus === "idle") return;
+    const timer = window.setTimeout(() => setCopyStatus("idle"), 2_000);
+    return () => window.clearTimeout(timer);
+  }, [copyStatus]);
+
   async function handleCopyPlan() {
     if (plan.items.length === 0) return;
 
-    await navigator.clipboard.writeText(formatAlchPlanShoppingList(plan));
+    try {
+      await navigator.clipboard.writeText(formatAlchPlanShoppingList(plan));
+      setCopyStatus("copied");
+    } catch {
+      setCopyStatus("failed");
+    }
   }
 
   return (
@@ -77,13 +108,20 @@ export function AlchPlanDrawer({
         aria-label="Alch plan"
         aria-hidden={!isOpen}
         className={`planDrawer ${isOpen ? "open" : ""}`}
+        inert={!isOpen}
+        role="dialog"
       >
         <div className="planHeader">
           <div>
             <h2>Alch Plan</h2>
             <p>{plan.totals.itemCount} items selected · saved locally</p>
           </div>
-          <button className="iconButton" onClick={onClose} type="button">
+          <button
+            className="iconButton"
+            onClick={onClose}
+            ref={closeButtonRef}
+            type="button"
+          >
             Close
           </button>
         </div>
@@ -218,12 +256,21 @@ export function AlchPlanDrawer({
             </div>
 
             <div className="planActions">
-              <button onClick={handleCopyPlan} type="button">
-                Copy list
-              </button>
-              <button onClick={onClear} type="button">
-                Clear plan
-              </button>
+              <span aria-live="polite" className="planActionStatus">
+                {copyStatus === "copied"
+                  ? "Copied to clipboard"
+                  : copyStatus === "failed"
+                    ? "Could not copy"
+                    : ""}
+              </span>
+              <div className="planActionButtons">
+                <button onClick={handleCopyPlan} type="button">
+                  {copyStatus === "copied" ? "Copied!" : "Copy list"}
+                </button>
+                <button onClick={onClear} type="button">
+                  Clear plan
+                </button>
+              </div>
             </div>
           </>
         )}

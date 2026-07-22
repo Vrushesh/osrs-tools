@@ -59,6 +59,25 @@ select {
   font: inherit;
 }
 
+button,
+input,
+select,
+.filtersToggle {
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.filtersToggleInput:focus-visible + .filtersToggle {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 .appShell {
   display: flex;
   flex-direction: column;
@@ -128,13 +147,18 @@ select {
 }
 
 .planToggle {
-  color: var(--text);
-  background: var(--panel);
-  border: 1px solid var(--line);
+  color: var(--active-text);
+  background: var(--gold);
+  border: 1px solid transparent;
   border-radius: 999px;
   padding: 7px 11px;
   font-weight: 800;
   cursor: pointer;
+}
+
+.planToggle:hover,
+.planToggle:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 
 .dataStatus {
@@ -162,11 +186,73 @@ select {
   width: 100%;
   max-width: 1440px;
   margin: 0 auto 16px;
-  padding: 14px 16px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
+}
+
+.playerPanelToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.playerPanelToggle::-webkit-details-marker {
+  display: none;
+}
+
+.playerPanelToggle:hover,
+.playerPanelToggle:focus-visible {
+  background: var(--panel-strong);
+}
+
+.playerPanelTitle {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.playerPanelTitle strong {
+  font-size: 15px;
+}
+
+.playerPanelTitle span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.playerPanelToggleMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.playerPanelChevron {
+  width: 22px;
+  color: var(--gold);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  transition: transform 120ms ease;
+}
+
+.playerPanel[open] .playerPanelChevron {
+  transform: rotate(45deg);
+}
+
+.playerPanelContent {
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.playerPanelToggle .combatSummary strong {
+  font-size: 22px;
 }
 
 .playerPanel input,
@@ -178,7 +264,6 @@ select {
   padding: 7px 10px;
 }
 
-.playerPanelHeader,
 .playerLookupForm,
 .playerInsights {
   display: flex;
@@ -187,16 +272,6 @@ select {
   gap: 14px;
 }
 
-.playerPanelHeader {
-  margin-bottom: 12px;
-}
-
-.playerPanel h2 {
-  margin: 0 0 3px;
-  font-size: 18px;
-}
-
-.playerPanel p,
 .playerLookupForm span,
 .playerInsights span,
 .playerInsights small {
@@ -576,6 +651,7 @@ select {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
+  scrollbar-color: var(--line) var(--panel);
 }
 
 .alchTable {
@@ -602,6 +678,33 @@ th {
   top: 0;
   font-size: 13px;
   line-height: 1.2;
+}
+
+.alchTable .planColumn,
+.alchTable .itemColumn {
+  position: sticky;
+  z-index: 2;
+  background: var(--panel);
+}
+
+.alchTable .planColumn {
+  left: 0;
+}
+
+.alchTable .itemColumn {
+  left: 44px;
+  box-shadow: 1px 0 0 var(--line);
+}
+
+.alchTable thead .planColumn,
+.alchTable thead .itemColumn {
+  z-index: 4;
+  background: var(--table-head);
+}
+
+.alchTable tbody tr:hover .planColumn,
+.alchTable tbody tr:hover .itemColumn {
+  background: var(--panel-strong);
 }
 
 .alchTable th:nth-child(1),
@@ -673,6 +776,11 @@ th {
 .addPlanButton:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+
+.addPlanButton:not(:disabled):hover,
+.addPlanButton:not(:disabled):focus-visible {
+  border-color: var(--gold);
 }
 
 .sortHeader {
@@ -902,17 +1010,24 @@ tbody tr:hover {
   border-left: 1px solid var(--line);
   box-shadow: -16px 0 42px rgba(0, 0, 0, 0.22);
   transform: translateX(100%);
-  transition: transform 160ms ease;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform 160ms ease,
+    visibility 0s linear 160ms;
 }
 
 .planDrawer.open {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }
 
 .planHeader,
 .planItemTop,
 .quantityRow,
-.planActions,
+.planActionButtons,
 .planBudget {
   display: flex;
   align-items: center;
@@ -1112,7 +1227,21 @@ tbody tr:hover {
 }
 
 .planActions {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: 12px;
+}
+
+.planActionButtons {
+  flex: 0 0 auto;
+}
+
+.planActionStatus {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 @media (max-width: 720px) {
@@ -1138,15 +1267,15 @@ tbody tr:hover {
   }
 
   .controlsPanel {
-    order: 3;
-  }
-
-  .tableWrap {
     order: 4;
   }
 
-  .playerPanel {
+  .tableWrap {
     order: 5;
+  }
+
+  .playerPanel {
+    order: 3;
   }
 
   .toolbar {
@@ -1220,7 +1349,6 @@ tbody tr:hover {
   }
 
   .controlsTop,
-  .playerPanelHeader,
   .playerLookupForm,
   .controlsBottom {
     display: flex;
@@ -1251,6 +1379,19 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
+  .playerPanelToggle {
+    align-items: center;
+    padding: 11px 12px;
+  }
+
+  .playerPanelTitle span {
+    white-space: normal;
+  }
+
+  .playerPanelContent {
+    padding: 12px;
+  }
+
   .combatSummary {
     justify-items: start;
   }
@@ -1260,7 +1401,10 @@ tbody tr:hover {
   }
 
   .filtersToggle {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-top: 10px;
     padding: 9px 12px;
     color: var(--text);
@@ -1270,6 +1414,32 @@ tbody tr:hover {
     cursor: pointer;
     overflow-wrap: anywhere;
     white-space: normal;
+  }
+
+  .filtersToggle::after {
+    content: "+";
+    flex: 0 0 auto;
+    color: var(--gold);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .filtersToggleInput {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .filtersToggleInput:checked + .filtersToggle {
+    border-color: var(--gold);
+  }
+
+  .filtersToggleInput:checked + .filtersToggle::after {
+    content: "−";
   }
 
   .presetBar {
@@ -1360,6 +1530,11 @@ tbody tr:hover {
     min-width: 1240px;
   }
 
+  .alchTable th:nth-child(2),
+  .alchTable td:nth-child(2) {
+    width: 220px;
+  }
+
   th,
   td {
     padding: 7px 10px;
@@ -1404,5 +1579,18 @@ tbody tr:hover {
   .planBudget label,
   .planBudget input {
     width: 100%;
+  }
+
+  .planActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .planActionButtons {
+    width: 100%;
+  }
+
+  .planActionButtons button {
+    flex: 1;
   }
 }
