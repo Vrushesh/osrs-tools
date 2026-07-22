@@ -29,6 +29,11 @@ import {
 import type { SortKey, SortState } from "@/lib/osrs/table";
 import type { EnrichedAlchRow } from "@/lib/osrs/table";
 import type { AlchRow, PriceApiPayload, PricingMode } from "@/lib/osrs/types";
+import {
+  parseCalculatorViewQuery,
+  serializeCalculatorView,
+} from "@/lib/osrs/view-state";
+import type { CalculatorPageSize } from "@/lib/osrs/view-state";
 import { parseWatchlistIds, toggleWatchlistId } from "@/lib/osrs/watchlist";
 
 const DEFAULT_RUNE_COST = 105;
@@ -36,7 +41,6 @@ const PLAN_STORAGE_KEY = "osrs-high-alch-plan:v1";
 const PREFERENCES_STORAGE_KEY = "osrs-high-alch-preferences:v1";
 const THEME_STORAGE_KEY = "osrs-high-alch-theme:v1";
 const WATCHLIST_STORAGE_KEY = "osrs-high-alch-watchlist:v1";
-type PageSize = 25 | 50 | 100 | "all";
 type ThemeMode = "system" | "dark" | "light";
 
 type StoredPreferences = {
@@ -48,7 +52,7 @@ type StoredPreferences = {
   minRoi?: string;
   maxProfit?: string;
   hideStale?: boolean;
-  pageSize?: PageSize;
+  pageSize?: CalculatorPageSize;
 };
 
 export default function Home() {
@@ -67,7 +71,7 @@ export default function Home() {
   const [maxProfit, setMaxProfit] = useState("");
   const [hideStale, setHideStale] = useState(true);
   const [watchedOnly, setWatchedOnly] = useState(false);
-  const [pageSize, setPageSize] = useState<PageSize>(100);
+  const [pageSize, setPageSize] = useState<CalculatorPageSize>(100);
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState>({
     key: "profit",
@@ -85,6 +89,9 @@ export default function Home() {
   const [planCashStack, setPlanCashStack] = useState("");
   const [isPlanStorageReady, setIsPlanStorageReady] = useState(false);
   const [isPlanOpen, setIsPlanOpen] = useState(false);
+  const [shareStatus, setShareStatus] = useState<
+    "idle" | "copied" | "failed"
+  >("idle");
   const [watchItemIds, setWatchItemIds] = useState<number[]>([]);
   const refreshInFlight = useRef(false);
   const hasMountedPreferences = useRef(false);
@@ -93,18 +100,21 @@ export default function Home() {
 
   useEffect(() => {
     const stored = readStoredPreferences();
-    if (!stored) return;
+    const shared = parseCalculatorViewQuery(window.location.search);
+    if (!stored && Object.keys(shared).length === 0) return;
 
     const frame = window.requestAnimationFrame(() => {
-      setPricingMode(stored.pricingMode ?? "recent");
-      setIncludeMembers(stored.includeMembers ?? true);
-      setMinLimit(stored.minLimit ?? "");
-      setMinVolume(stored.minVolume ?? "5");
-      setMinProfit(stored.minProfit ?? "1");
-      setMinRoi(stored.minRoi ?? "");
-      setMaxProfit(stored.maxProfit ?? "");
-      setHideStale(stored.hideStale ?? true);
-      setPageSize(stored.pageSize ?? 100);
+      setPricingMode(shared.pricingMode ?? stored?.pricingMode ?? "recent");
+      setSearch(shared.search ?? "");
+      setIncludeMembers(shared.includeMembers ?? stored?.includeMembers ?? true);
+      setMinLimit(shared.minLimit ?? stored?.minLimit ?? "");
+      setMinVolume(shared.minVolume ?? stored?.minVolume ?? "5");
+      setMinProfit(shared.minProfit ?? stored?.minProfit ?? "1");
+      setMinRoi(shared.minRoi ?? stored?.minRoi ?? "");
+      setMaxProfit(shared.maxProfit ?? stored?.maxProfit ?? "");
+      setHideStale(shared.hideStale ?? stored?.hideStale ?? true);
+      setPageSize(shared.pageSize ?? stored?.pageSize ?? 100);
+      setSort(shared.sort ?? { key: "profit", direction: "desc" });
       setPage(1);
     });
 
@@ -338,6 +348,12 @@ export default function Home() {
     };
   }, [isPlanOpen]);
 
+  useEffect(() => {
+    if (shareStatus === "idle") return;
+    const timer = window.setTimeout(() => setShareStatus("idle"), 2_000);
+    return () => window.clearTimeout(timer);
+  }, [shareStatus]);
+
   const refreshState = fetchedAtSeconds
     ? getRefreshState(fetchedAtSeconds, nowSeconds)
     : null;
@@ -447,6 +463,30 @@ export default function Home() {
     setPage(1);
   }
 
+  async function handleCopyView() {
+    const query = serializeCalculatorView({
+      pricingMode,
+      search,
+      includeMembers,
+      hideStale,
+      minLimit,
+      minVolume,
+      minProfit,
+      maxProfit,
+      minRoi,
+      pageSize,
+      sort,
+    });
+    const url = `${window.location.origin}${window.location.pathname}?${query}`;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareStatus("copied");
+    } catch {
+      setShareStatus("failed");
+    }
+  }
+
   function handleApplyFilterPreset(id: FilterPresetId) {
     const preset = getFilterPresetValues(id);
     setIncludeMembers(preset.includeMembers);
@@ -500,6 +540,7 @@ export default function Home() {
         direction: current.direction === "desc" ? "asc" : "desc",
       };
     });
+    setPage(1);
   }
 
   function handleAddToPlan(entry: EnrichedAlchRow) {
@@ -622,8 +663,10 @@ export default function Home() {
         search={search}
         isPriceLoading={isPriceLoading}
         onApplyFilterPreset={handleApplyFilterPreset}
+        onCopyView={handleCopyView}
         watchedCount={watchItemIds.length}
         watchedOnly={watchedOnly}
+        shareStatus={shareStatus}
         onToggleWatchedOnly={handleToggleWatchedOnly}
         onPlanWatched={handlePlanWatchedItems}
         setIncludeMembers={(value) =>
@@ -708,7 +751,7 @@ function isPricingMode(value: unknown): value is PricingMode {
   return value === "recent" || value === "stable";
 }
 
-function isPageSize(value: unknown): value is PageSize {
+function isPageSize(value: unknown): value is CalculatorPageSize {
   return value === 25 || value === 50 || value === 100 || value === "all";
 }
 

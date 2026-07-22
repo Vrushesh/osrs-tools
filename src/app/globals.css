@@ -427,6 +427,11 @@ select:focus-visible,
   opacity: 0.55;
 }
 
+.presetBar .shareViewButton {
+  margin-left: auto;
+  border-style: dashed;
+}
+
 .controlsMiddle,
 .filtersContent {
   display: grid;
@@ -1444,6 +1449,10 @@ tbody tr:hover {
 
   .presetBar {
     padding-bottom: 2px;
+  }
+
+  .presetBar .shareViewButton {
+    margin-left: 0;
   }
 
   .filtersContent {

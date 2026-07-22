@@ -2,8 +2,7 @@ import Image from "next/image";
 import { FILTER_PRESETS } from "@/lib/osrs/filter-presets";
 import type { FilterPresetId } from "@/lib/osrs/filter-presets";
 import type { PricingMode } from "@/lib/osrs/types";
-
-type PageSize = 25 | 50 | 100 | "all";
+import type { CalculatorPageSize } from "@/lib/osrs/view-state";
 
 type Props = {
   pricingMode: PricingMode;
@@ -27,8 +26,8 @@ type Props = {
   setMinRoi: (value: string) => void;
   maxProfit: string;
   setMaxProfit: (value: string) => void;
-  pageSize: PageSize;
-  setPageSize: (value: PageSize) => void;
+  pageSize: CalculatorPageSize;
+  setPageSize: (value: CalculatorPageSize) => void;
   page: number;
   totalPages: number;
   resultStart: number;
@@ -36,6 +35,8 @@ type Props = {
   totalRows: number;
   isPriceLoading: boolean;
   onApplyFilterPreset: (id: FilterPresetId) => void;
+  onCopyView: () => void;
+  shareStatus: "idle" | "copied" | "failed";
   watchedCount: number;
   watchedOnly: boolean;
   onToggleWatchedOnly: () => void;
@@ -148,6 +149,25 @@ export function CalculatorControls(props: Props) {
         >
           Plan watched
         </button>
+        <button
+          className={`shareViewButton ${props.shareStatus === "copied" ? "active" : ""}`}
+          title="Copy a link with the current pricing mode, filters, and sort order"
+          type="button"
+          onClick={props.onCopyView}
+        >
+          {props.shareStatus === "copied"
+            ? "View copied!"
+            : props.shareStatus === "failed"
+              ? "Copy failed"
+              : "Copy view"}
+        </button>
+        <span aria-live="polite" className="srOnly">
+          {props.shareStatus === "copied"
+            ? "Calculator view link copied to clipboard"
+            : props.shareStatus === "failed"
+              ? "Calculator view link could not be copied"
+              : ""}
+        </span>
       </div>
 
       <div className="filtersContent">
@@ -244,7 +264,11 @@ export function CalculatorControls(props: Props) {
             value={String(props.pageSize)}
             onChange={(event) => {
               const value = event.target.value;
-              props.setPageSize(value === "all" ? "all" : (Number(value) as PageSize));
+              props.setPageSize(
+                value === "all"
+                  ? "all"
+                  : (Number(value) as CalculatorPageSize),
+              );
             }}
           >
             <option value="25">25</option>
