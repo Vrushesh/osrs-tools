@@ -23,6 +23,8 @@ type Props = {
   setMinVolume: (value: string) => void;
   minProfit: string;
   setMinProfit: (value: string) => void;
+  minRoi: string;
+  setMinRoi: (value: string) => void;
   maxProfit: string;
   setMaxProfit: (value: string) => void;
   pageSize: PageSize;
@@ -113,6 +115,7 @@ export function CalculatorControls(props: Props) {
         Filters: {props.hideStale ? "Fresh trades" : "All ages"} · Limit{" "}
         {props.minLimit || "any"} · Vol {props.minVolume || "any"} · Profit{" "}
         {props.minProfit || "any"}+
+        {props.minRoi ? ` · ROI ${props.minRoi}%+` : ""}
         {props.watchedOnly ? " · Watched" : ""}
       </label>
 
@@ -193,6 +196,18 @@ export function CalculatorControls(props: Props) {
             type="number"
             value={props.minVolume}
             onChange={(event) => props.setMinVolume(event.target.value)}
+          />
+        </label>
+
+        <label className="compactControl">
+          Min ROI %
+          <input
+            min="0"
+            placeholder="Min"
+            step="0.1"
+            type="number"
+            value={props.minRoi}
+            onChange={(event) => props.setMinRoi(event.target.value)}
           />
         </label>
 

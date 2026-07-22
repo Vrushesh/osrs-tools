@@ -9,6 +9,7 @@ describe("filter presets", () => {
       minLimit: "",
       minVolume: "5",
       minProfit: "1",
+      minRoi: "",
       maxProfit: "",
     });
   });

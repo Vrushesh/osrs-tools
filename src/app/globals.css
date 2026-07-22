@@ -355,7 +355,7 @@ select {
 .controlsMiddle,
 .filtersContent {
   display: grid;
-  grid-template-columns: auto minmax(126px, 0.7fr) auto minmax(150px, 0.8fr) minmax(260px, 1.2fr);
+  grid-template-columns: auto minmax(110px, 0.7fr) auto minmax(130px, 0.8fr) minmax(120px, 0.7fr) minmax(240px, 1.2fr);
   align-items: center;
 }
 
@@ -581,7 +581,7 @@ select {
 .alchTable {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1060px;
+  min-width: 1240px;
   font-variant-numeric: tabular-nums;
   table-layout: fixed;
 }
@@ -611,26 +611,33 @@ th {
 
 .alchTable th:nth-child(2),
 .alchTable td:nth-child(2) {
-  width: 34%;
+  width: 300px;
 }
 
 .alchTable th:nth-child(3),
 .alchTable td:nth-child(3),
 .alchTable th:nth-child(4),
 .alchTable td:nth-child(4),
-.alchTable th:nth-child(7),
-.alchTable td:nth-child(7) {
-  width: 10%;
+.alchTable th:nth-child(6),
+.alchTable td:nth-child(6),
+.alchTable th:nth-child(9),
+.alchTable td:nth-child(9) {
+  width: 100px;
 }
 
 .alchTable th:nth-child(5),
 .alchTable td:nth-child(5) {
-  width: 16%;
+  width: 150px;
 }
 
-.alchTable th:nth-child(6),
-.alchTable td:nth-child(6) {
-  width: 20%;
+.alchTable th:nth-child(7),
+.alchTable td:nth-child(7) {
+  width: 130px;
+}
+
+.alchTable th:nth-child(8),
+.alchTable td:nth-child(8) {
+  width: 180px;
 }
 
 .numeric {
@@ -1350,7 +1357,7 @@ tbody tr:hover {
   }
 
   .alchTable {
-    min-width: 900px;
+    min-width: 1240px;
   }
 
   th,
