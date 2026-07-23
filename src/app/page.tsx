@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlchPlanDrawer } from "@/components/AlchPlanDrawer";
 import { AlchTable } from "@/components/AlchTable";
 import { CalculatorControls } from "@/components/CalculatorControls";
@@ -19,6 +19,12 @@ import {
   pruneStoredAlchPlan,
   serializeStoredAlchPlan,
 } from "@/lib/osrs/plan-storage";
+import {
+  getFeedStatusLabel,
+  INITIAL_PRICE_FEED_HEALTH,
+  reconcilePricingMode,
+  updatePriceFeedHealth,
+} from "@/lib/osrs/pricing-health";
 import { canStartRefresh, getRefreshState } from "@/lib/osrs/refresh";
 import {
   enrichRows,
@@ -82,6 +88,7 @@ export default function Home() {
     Math.floor(Date.now() / 1000),
   );
   const [status, setStatus] = useState("Loading prices...");
+  const [feedHealth, setFeedHealth] = useState(INITIAL_PRICE_FEED_HEALTH);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
   const [planItemIds, setPlanItemIds] = useState<number[]>([]);
@@ -94,6 +101,7 @@ export default function Home() {
   >("idle");
   const [watchItemIds, setWatchItemIds] = useState<number[]>([]);
   const refreshInFlight = useRef(false);
+  const hasSuccessfulPriceLoad = useRef(false);
   const hasMountedPreferences = useRef(false);
   const hasMountedTheme = useRef(false);
   const hasLoadedWatchlist = useRef(false);
@@ -261,7 +269,18 @@ export default function Home() {
     return () => media.removeEventListener("change", applyTheme);
   }, [themeMode]);
 
-  async function loadPrices(forceMessage = false) {
+  const markPriceLoadFailed = useCallback(() => {
+    setFeedHealth((current) =>
+      updatePriceFeedHealth(current, { type: "failure" }),
+    );
+    if (!hasSuccessfulPriceLoad.current) {
+      setPricingMode((current) =>
+        reconcilePricingMode(current, "unavailable"),
+      );
+    }
+  }, []);
+
+  const loadPrices = useCallback(async (forceMessage = false) => {
     if (refreshInFlight.current) return;
 
     refreshInFlight.current = true;
@@ -271,6 +290,7 @@ export default function Home() {
       const response = await fetch("/api/prices");
 
       if (!response.ok) {
+        markPriceLoadFailed();
         setStatus(
           "Price feed unavailable. Showing the last successful data if available.",
         );
@@ -278,22 +298,48 @@ export default function Home() {
       }
 
       const payload = (await response.json()) as PriceApiPayload;
+      hasSuccessfulPriceLoad.current = true;
       setRows(payload.rows);
+      setFeedHealth((current) =>
+        updatePriceFeedHealth(current, {
+          type: "success",
+          stableAvailable: payload.stableAvailable,
+        }),
+      );
+      setPricingMode((current) =>
+        reconcilePricingMode(
+          current,
+          payload.stableAvailable ? "online" : "unavailable",
+        ),
+      );
       if (payload.natureRunePrice !== null) {
         if (!hasEditedNatureRuneCost.current) {
           setNatureRuneCost(payload.natureRunePrice);
-          setNatureRuneSourceText(`${payload.natureRunePrice.toLocaleString()} gp live`);
+          setNatureRuneSourceText(
+            `${payload.natureRunePrice.toLocaleString()} gp live`,
+          );
         } else {
           setNatureRuneSourceText(
             `manual override · live ${payload.natureRunePrice.toLocaleString()} gp`,
           );
         }
       } else if (!hasEditedNatureRuneCost.current) {
-        setNatureRuneSourceText(`${DEFAULT_RUNE_COST.toLocaleString()} gp fallback`);
+        setNatureRuneSourceText(
+          `${DEFAULT_RUNE_COST.toLocaleString()} gp fallback`,
+        );
       }
-      setFetchedAtSeconds(Math.floor(new Date(payload.fetchedAt).getTime() / 1000));
-      setStatus(forceMessage ? "Price feed refreshed." : "Price feed loaded.");
+      setFetchedAtSeconds(
+        Math.floor(new Date(payload.fetchedAt).getTime() / 1000),
+      );
+      setStatus(
+        payload.stableAvailable
+          ? forceMessage
+            ? "Price feed refreshed."
+            : "Price feed loaded."
+          : "Recent prices loaded. Stable pricing is temporarily unavailable.",
+      );
     } catch {
+      markPriceLoadFailed();
       setStatus(
         "Price feed unavailable. Showing the last successful data if available.",
       );
@@ -301,7 +347,7 @@ export default function Home() {
       refreshInFlight.current = false;
       setIsRefreshing(false);
     }
-  }
+  }, [markPriceLoadFailed]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -309,7 +355,7 @@ export default function Home() {
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [loadPrices]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -329,7 +375,7 @@ export default function Home() {
     }, 1000);
 
     return () => window.clearInterval(interval);
-  }, [fetchedAtSeconds]);
+  }, [fetchedAtSeconds, loadPrices]);
 
   useEffect(() => {
     if (!isPlanOpen) return;
@@ -634,6 +680,18 @@ export default function Home() {
         </div>
       </section>
       <section className="dataStatus" aria-label="Price refresh status">
+        <div
+          aria-label="Price source health"
+          aria-live="polite"
+          className="feedHealth"
+        >
+          <span className={`feedChip feed-${feedHealth.recent}`}>
+            Recent {getFeedStatusLabel(feedHealth.recent)}
+          </span>
+          <span className={`feedChip feed-${feedHealth.stable}`}>
+            Stable {getFeedStatusLabel(feedHealth.stable)}
+          </span>
+        </div>
         <button
           className="refreshButton"
           disabled={isRefreshing}
@@ -658,6 +716,7 @@ export default function Home() {
         page={safePage}
         pageSize={pageSize}
         pricingMode={pricingMode}
+        stableFeedStatus={feedHealth.stable}
         resultEnd={resultEnd}
         resultStart={resultStart}
         search={search}

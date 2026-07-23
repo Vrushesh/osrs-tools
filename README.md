@@ -14,7 +14,7 @@ Current features:
 - item search, sorting, pagination, and row-count controls
 - member item filtering
 - minimum GE limit, minimum 5-minute volume, ROI, and profit range filters
-- price freshness and next-refresh status
+- price freshness, source-health indicators, and safe stable-feed fallback
 - shareable calculator views with portable filters and sort order
 - locally saved watchlists and Alch Plans with budget and session economics
 - compact desktop and mobile table layouts

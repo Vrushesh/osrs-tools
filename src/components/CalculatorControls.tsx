@@ -1,12 +1,14 @@
 import Image from "next/image";
 import { FILTER_PRESETS } from "@/lib/osrs/filter-presets";
 import type { FilterPresetId } from "@/lib/osrs/filter-presets";
+import type { FeedStatus } from "@/lib/osrs/pricing-health";
 import type { PricingMode } from "@/lib/osrs/types";
 import type { CalculatorPageSize } from "@/lib/osrs/view-state";
 
 type Props = {
   pricingMode: PricingMode;
   setPricingMode: (mode: PricingMode) => void;
+  stableFeedStatus: FeedStatus;
   search: string;
   setSearch: (value: string) => void;
   natureRuneCost: number;
@@ -54,6 +56,13 @@ const pricingModeHelp = {
 };
 
 export function CalculatorControls(props: Props) {
+  const stablePricingHelp =
+    props.stableFeedStatus === "unavailable"
+      ? "Stable Pricing is temporarily unavailable because the 5-minute OSRS Wiki feed could not be loaded."
+      : props.stableFeedStatus === "cached"
+        ? `${pricingModeHelp.stable} The last successful stable data is currently cached.`
+        : pricingModeHelp.stable;
+
   return (
     <section className="controlsPanel">
       <div className="controlsTop">
@@ -72,8 +81,9 @@ export function CalculatorControls(props: Props) {
           </button>
           <button
             className={props.pricingMode === "stable" ? "active" : ""}
+            disabled={props.stableFeedStatus === "unavailable"}
             onClick={() => props.setPricingMode("stable")}
-            title={pricingModeHelp.stable}
+            title={stablePricingHelp}
             type="button"
           >
             <span className="modeLabelFull">Stable Pricing</span>
@@ -82,7 +92,12 @@ export function CalculatorControls(props: Props) {
               ?
             </span>
           </button>
-          <button disabled title={pricingModeHelp.official} type="button">
+          <button
+            className="officialMode"
+            disabled
+            title={pricingModeHelp.official}
+            type="button"
+          >
             Official GE
             <span className="modeHelp" aria-hidden="true">
               ?
